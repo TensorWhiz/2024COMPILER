@@ -1,0 +1,52 @@
+clang++ -std=c++17 -g -c compiler.cpp
+clang++ -std=c++17 -g -o compiler y.tab.o lex.yy.o TeaplAst.o TeaplaAst.o PrintTeaplaAst.o compiler.o 
+PASS BFS
+
+PASS DFS
+
+PASS bin_search
+
+PASS brainfk
+
+PASS dijkstra
+
+PASS expr_eval
+
+PASS full_conn
+
+PASS hanoi
+
+PASS insert_order
+
+PASS int_io
+
+PASS int_split
+
+PASS jump_game
+
+PASS line_search
+
+PASS palindrome_number
+
+PASS register_alloca
+
+PASS sort_test5
+
+PASS sort_test7
+
+PASS test01
+
+PASS test02
+
+PASS test03
+
+PASS test04
+
+PASS test05
+
+PASS test06
+
+PASS test07
+
+PASS unique_path
+
