@@ -76,13 +76,13 @@ int calc(const char *s, int len);
 "while" { yylval.pos = A_Pos(line,col); col+=5; return WHILE; }
 "break" { yylval.pos = A_Pos(line,col); col+=5; return BREAK; }
 "continue" { yylval.pos = A_Pos(line,col); col+=8; return CONTINUE; }
-"ret" { yylval.pos = A_Pos(line,col); col+=6; return RETURN; }
+"ret" { yylval.pos = A_Pos(line,col); col+=3; return RETURN; }
 
 "int" { yylval.pos = A_Pos(line,col); col+=3; return INT; }
 
-"fn" { yylval.pos = A_Pos(line,col); col+=1; return FN; }
+"fn" { yylval.pos = A_Pos(line,col); col+=2; return FN; }
 "let" { yylval.pos = A_Pos(line,col); col+=3; return LET; }
-"struct" { yylval.pos = A_Pos(line,col); col+=5; return STRUCT; }
+"struct" { yylval.pos = A_Pos(line,col); col+=6; return STRUCT; }
 [1-9][0-9]* {
     yylval.tokenNum = A_TokenNum(A_Pos(line, col), calc(yytext, yyleng));
     col+=yyleng;
