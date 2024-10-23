@@ -580,16 +580,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   142,   142,   149,   154,   159,   163,   170,   174,   180,
-     184,   190,   194,   200,   204,   208,   212,   218,   222,   229,
-     233,   237,   242,   246,   250,   257,   261,   265,   269,   273,
-     278,   284,   288,   294,   298,   305,   309,   313,   317,   321,
-     325,   331,   335,   339,   345,   349,   353,   360,   366,   370,
-     374,   380,   386,   390,   394,   398,   404,   408,   412,   416,
-     420,   424,   431,   435,   441,   445,   451,   457,   461,   468,
-     473,   478,   482,   488,   494,   498,   504,   510,   516,   520,
-     526,   532,   538,   542,   546,   550,   554,   558,   562,   566,
-     570,   576,   579,   585,   591,   595,   599,   603,   607
+       0,   143,   143,   150,   155,   160,   164,   171,   175,   181,
+     185,   191,   195,   201,   205,   209,   213,   219,   223,   230,
+     234,   238,   243,   247,   251,   258,   262,   266,   270,   274,
+     279,   285,   289,   295,   299,   306,   310,   314,   318,   322,
+     326,   332,   336,   340,   346,   350,   354,   361,   367,   371,
+     375,   381,   387,   391,   395,   399,   405,   409,   413,   417,
+     421,   425,   432,   436,   442,   446,   452,   458,   462,   469,
+     474,   479,   483,   489,   495,   499,   505,   511,   517,   521,
+     527,   533,   539,   543,   547,   551,   555,   559,   563,   567,
+     571,   577,   580,   586,   592,   596,   600,   604,   608
 };
 #endif
 
@@ -1277,7 +1277,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Program: ProgramElementList  */
-#line 143 "parser.yacc"
+#line 144 "parser.yacc"
 {  
   root = A_Program((yyvsp[0].programElementList));
   (yyval.program) = A_Program((yyvsp[0].programElementList));
@@ -1286,7 +1286,7 @@ yyreduce:
     break;
 
   case 3: /* ProgramElementList: ProgramElement ProgramElementList  */
-#line 150 "parser.yacc"
+#line 151 "parser.yacc"
 {
   (yyval.programElementList) = A_ProgramElementList((yyvsp[-1].programElement), (yyvsp[0].programElementList));
 }
@@ -1294,7 +1294,7 @@ yyreduce:
     break;
 
   case 4: /* ProgramElementList: %empty  */
-#line 154 "parser.yacc"
+#line 155 "parser.yacc"
 {
   (yyval.programElementList) = nullptr;
 }
@@ -1302,7 +1302,7 @@ yyreduce:
     break;
 
   case 5: /* NUM: UNUM  */
-#line 160 "parser.yacc"
+#line 161 "parser.yacc"
 {
     (yyval.tokenNum)=A_TokenNum((yyvsp[0].tokenNum)->pos,(yyvsp[0].tokenNum)->num);
 }
@@ -1310,7 +1310,7 @@ yyreduce:
     break;
 
   case 6: /* NUM: SUB UNUM  */
-#line 164 "parser.yacc"
+#line 165 "parser.yacc"
 {
     (yyval.tokenNum)=A_TokenNum((yyvsp[-1].pos),-(yyvsp[0].tokenNum)->num);
 }
@@ -1318,7 +1318,7 @@ yyreduce:
     break;
 
   case 7: /* Type: INT  */
-#line 171 "parser.yacc"
+#line 172 "parser.yacc"
 {
     (yyval.type) = A_NativeType((yyvsp[0].pos), A_intTypeKind);
 }
@@ -1326,7 +1326,7 @@ yyreduce:
     break;
 
   case 8: /* Type: ID  */
-#line 175 "parser.yacc"
+#line 176 "parser.yacc"
 {
     (yyval.type) = A_StructType((yyvsp[0].tokenId)->pos, (yyvsp[0].tokenId)->id);
 }
@@ -1334,7 +1334,7 @@ yyreduce:
     break;
 
   case 9: /* RightValList: RightVal  */
-#line 181 "parser.yacc"
+#line 182 "parser.yacc"
 {
     (yyval.rightValList) = A_RightValList((yyvsp[0].rightVal), nullptr);
 }
@@ -1342,7 +1342,7 @@ yyreduce:
     break;
 
   case 10: /* RightValList: RightVal COMMA RightValList  */
-#line 185 "parser.yacc"
+#line 186 "parser.yacc"
 {
     (yyval.rightValList) = A_RightValList((yyvsp[-2].rightVal), (yyvsp[0].rightValList));
 }
@@ -1350,7 +1350,7 @@ yyreduce:
     break;
 
   case 11: /* FnCall: ID LP RightValList RP  */
-#line 191 "parser.yacc"
+#line 192 "parser.yacc"
 {
     (yyval.fnCall) = A_FnCall((yyvsp[-3].tokenId)->pos, (yyvsp[-3].tokenId)->id, (yyvsp[-1].rightValList));
 }
@@ -1358,7 +1358,7 @@ yyreduce:
     break;
 
   case 12: /* FnCall: ID LP RP  */
-#line 195 "parser.yacc"
+#line 196 "parser.yacc"
 {
     (yyval.fnCall) = A_FnCall((yyvsp[-2].tokenId)->pos, (yyvsp[-2].tokenId)->id, nullptr);
 }
@@ -1366,7 +1366,7 @@ yyreduce:
     break;
 
   case 13: /* ArrayExpr: ID LSB NUM RSB  */
-#line 201 "parser.yacc"
+#line 202 "parser.yacc"
 {
     (yyval.arrayExpr) = A_ArrayExpr((yyvsp[-3].tokenId)->pos, A_IdExprLVal((yyvsp[-3].tokenId)->pos, (yyvsp[-3].tokenId)->id), A_NumIndexExpr((yyvsp[-1].tokenNum)->pos, (yyvsp[-1].tokenNum)->num));
 }
@@ -1374,7 +1374,7 @@ yyreduce:
     break;
 
   case 14: /* ArrayExpr: ID LSB ID RSB  */
-#line 205 "parser.yacc"
+#line 206 "parser.yacc"
 {
     (yyval.arrayExpr) = A_ArrayExpr((yyvsp[-3].tokenId)->pos, A_IdExprLVal((yyvsp[-3].tokenId)->pos, (yyvsp[-3].tokenId)->id), A_IdIndexExpr((yyvsp[-1].tokenId)->pos, (yyvsp[-1].tokenId)->id));
 }
@@ -1382,7 +1382,7 @@ yyreduce:
     break;
 
   case 15: /* ArrayExpr: LeftVal LSB NUM RSB  */
-#line 209 "parser.yacc"
+#line 210 "parser.yacc"
 {
     (yyval.arrayExpr) = A_ArrayExpr((yyvsp[-3].leftVal)->pos, (yyvsp[-3].leftVal), A_NumIndexExpr((yyvsp[-1].tokenNum)->pos, (yyvsp[-1].tokenNum)->num));
 }
@@ -1390,7 +1390,7 @@ yyreduce:
     break;
 
   case 16: /* ArrayExpr: LeftVal LSB ID RSB  */
-#line 213 "parser.yacc"
+#line 214 "parser.yacc"
 {
     (yyval.arrayExpr) = A_ArrayExpr((yyvsp[-3].leftVal)->pos, (yyvsp[-3].leftVal), A_IdIndexExpr((yyvsp[-1].tokenId)->pos, (yyvsp[-1].tokenId)->id));
 }
@@ -1398,7 +1398,7 @@ yyreduce:
     break;
 
   case 17: /* MemberExpr: ID DOT ID  */
-#line 219 "parser.yacc"
+#line 220 "parser.yacc"
 {
     (yyval.memberExpr) = A_MemberExpr((yyvsp[-2].tokenId)->pos, A_IdExprLVal((yyvsp[-2].tokenId)->pos, (yyvsp[-2].tokenId)->id), (yyvsp[0].tokenId)->id);
 }
@@ -1406,7 +1406,7 @@ yyreduce:
     break;
 
   case 18: /* MemberExpr: LeftVal DOT ID  */
-#line 223 "parser.yacc"
+#line 224 "parser.yacc"
 {
     (yyval.memberExpr) = A_MemberExpr((yyvsp[-2].leftVal)->pos, (yyvsp[-2].leftVal), (yyvsp[0].tokenId)->id);
 }
@@ -1414,7 +1414,7 @@ yyreduce:
     break;
 
   case 19: /* ExprUnit: NUM  */
-#line 230 "parser.yacc"
+#line 231 "parser.yacc"
 {
     (yyval.exprUnit) = A_NumExprUnit((yyvsp[0].tokenNum)->pos, (yyvsp[0].tokenNum)->num);
 }
@@ -1422,7 +1422,7 @@ yyreduce:
     break;
 
   case 20: /* ExprUnit: ID  */
-#line 234 "parser.yacc"
+#line 235 "parser.yacc"
 {
     (yyval.exprUnit) = A_IdExprUnit((yyvsp[0].tokenId)->pos, (yyvsp[0].tokenId)->id);
 }
@@ -1430,7 +1430,7 @@ yyreduce:
     break;
 
   case 21: /* ExprUnit: LP ArithExpr RP  */
-#line 238 "parser.yacc"
+#line 239 "parser.yacc"
 {
     (yyval.exprUnit) = A_ArithExprUnit((yyvsp[-1].arithExpr)->pos, (yyvsp[-1].arithExpr));
 }
@@ -1438,7 +1438,7 @@ yyreduce:
     break;
 
   case 22: /* ExprUnit: FnCall  */
-#line 243 "parser.yacc"
+#line 244 "parser.yacc"
 {
     (yyval.exprUnit) = A_CallExprUnit((yyvsp[0].fnCall)->pos, (yyvsp[0].fnCall));
 }
@@ -1446,7 +1446,7 @@ yyreduce:
     break;
 
   case 23: /* ExprUnit: ArrayExpr  */
-#line 247 "parser.yacc"
+#line 248 "parser.yacc"
 {
     (yyval.exprUnit) = A_ArrayExprUnit((yyvsp[0].arrayExpr)->pos, (yyvsp[0].arrayExpr));
 }
@@ -1454,7 +1454,7 @@ yyreduce:
     break;
 
   case 24: /* ExprUnit: MemberExpr  */
-#line 251 "parser.yacc"
+#line 252 "parser.yacc"
 {
     (yyval.exprUnit) = A_MemberExprUnit((yyvsp[0].memberExpr)->pos, (yyvsp[0].memberExpr));
 }
@@ -1462,7 +1462,7 @@ yyreduce:
     break;
 
   case 25: /* ArithExpr: ArithExpr ADD ArithExpr  */
-#line 258 "parser.yacc"
+#line 259 "parser.yacc"
 {
     (yyval.arithExpr) = A_ArithBiOp_Expr((yyvsp[-2].arithExpr)->pos, A_ArithBiOpExpr((yyvsp[-2].arithExpr)->pos, A_add, (yyvsp[-2].arithExpr), (yyvsp[0].arithExpr)));
 }
@@ -1470,7 +1470,7 @@ yyreduce:
     break;
 
   case 26: /* ArithExpr: ArithExpr SUB ArithExpr  */
-#line 262 "parser.yacc"
+#line 263 "parser.yacc"
 {
     (yyval.arithExpr) = A_ArithBiOp_Expr((yyvsp[-2].arithExpr)->pos, A_ArithBiOpExpr((yyvsp[-2].arithExpr)->pos, A_sub, (yyvsp[-2].arithExpr), (yyvsp[0].arithExpr)));
 }
@@ -1478,7 +1478,7 @@ yyreduce:
     break;
 
   case 27: /* ArithExpr: ArithExpr MUL ArithExpr  */
-#line 266 "parser.yacc"
+#line 267 "parser.yacc"
 {
     (yyval.arithExpr) = A_ArithBiOp_Expr((yyvsp[-2].arithExpr)->pos, A_ArithBiOpExpr((yyvsp[-2].arithExpr)->pos, A_mul, (yyvsp[-2].arithExpr), (yyvsp[0].arithExpr)));
 }
@@ -1486,7 +1486,7 @@ yyreduce:
     break;
 
   case 28: /* ArithExpr: ArithExpr DIV ArithExpr  */
-#line 270 "parser.yacc"
+#line 271 "parser.yacc"
 {
     (yyval.arithExpr) = A_ArithBiOp_Expr((yyvsp[-2].arithExpr)->pos, A_ArithBiOpExpr((yyvsp[-2].arithExpr)->pos, A_div, (yyvsp[-2].arithExpr), (yyvsp[0].arithExpr)));
 }
@@ -1494,7 +1494,7 @@ yyreduce:
     break;
 
   case 29: /* ArithExpr: ExprUnit  */
-#line 274 "parser.yacc"
+#line 275 "parser.yacc"
 {
     (yyval.arithExpr) = A_ExprUnit((yyvsp[0].exprUnit)->pos, (yyvsp[0].exprUnit));
 }
@@ -1502,7 +1502,7 @@ yyreduce:
     break;
 
   case 30: /* BoolUOpExpr: NOT BoolUnit  */
-#line 279 "parser.yacc"
+#line 280 "parser.yacc"
 {
   (yyval.boolUOpExpr) = A_BoolUOpExpr((yyvsp[-1].pos), A_not, (yyvsp[0].boolUnit));
 }
@@ -1510,7 +1510,7 @@ yyreduce:
     break;
 
   case 31: /* BoolBiOpExpr: BoolExpr AND BoolExpr  */
-#line 285 "parser.yacc"
+#line 286 "parser.yacc"
 {
     (yyval.boolBiOpExpr) = A_BoolBiOpExpr((yyvsp[-2].boolExpr)->pos, A_and, (yyvsp[-2].boolExpr), (yyvsp[0].boolExpr));
 }
@@ -1518,7 +1518,7 @@ yyreduce:
     break;
 
   case 32: /* BoolBiOpExpr: BoolExpr OR BoolExpr  */
-#line 289 "parser.yacc"
+#line 290 "parser.yacc"
 {
     (yyval.boolBiOpExpr) = A_BoolBiOpExpr((yyvsp[-2].boolExpr)->pos, A_or, (yyvsp[-2].boolExpr), (yyvsp[0].boolExpr));
 }
@@ -1526,7 +1526,7 @@ yyreduce:
     break;
 
   case 33: /* BoolExpr: BoolBiOpExpr  */
-#line 295 "parser.yacc"
+#line 296 "parser.yacc"
 {
     (yyval.boolExpr) = A_BoolBiOp_Expr((yyvsp[0].boolBiOpExpr)->pos, (yyvsp[0].boolBiOpExpr));
 }
@@ -1534,7 +1534,7 @@ yyreduce:
     break;
 
   case 34: /* BoolExpr: BoolUnit  */
-#line 299 "parser.yacc"
+#line 300 "parser.yacc"
 {
     (yyval.boolExpr) = A_BoolExpr((yyvsp[0].boolUnit)->pos, (yyvsp[0].boolUnit));
 }
@@ -1542,7 +1542,7 @@ yyreduce:
     break;
 
   case 35: /* ComExpr: ExprUnit LT ExprUnit  */
-#line 306 "parser.yacc"
+#line 307 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_lt, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1550,7 +1550,7 @@ yyreduce:
     break;
 
   case 36: /* ComExpr: ExprUnit LE ExprUnit  */
-#line 310 "parser.yacc"
+#line 311 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_le, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1558,7 +1558,7 @@ yyreduce:
     break;
 
   case 37: /* ComExpr: ExprUnit GT ExprUnit  */
-#line 314 "parser.yacc"
+#line 315 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_gt, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1566,7 +1566,7 @@ yyreduce:
     break;
 
   case 38: /* ComExpr: ExprUnit GE ExprUnit  */
-#line 318 "parser.yacc"
+#line 319 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_ge, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1574,7 +1574,7 @@ yyreduce:
     break;
 
   case 39: /* ComExpr: ExprUnit EQ ExprUnit  */
-#line 322 "parser.yacc"
+#line 323 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_eq, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1582,7 +1582,7 @@ yyreduce:
     break;
 
   case 40: /* ComExpr: ExprUnit NE ExprUnit  */
-#line 326 "parser.yacc"
+#line 327 "parser.yacc"
 {
   (yyval.comExpr) = A_ComExpr((yyvsp[-2].exprUnit)->pos, A_ne, (yyvsp[-2].exprUnit), (yyvsp[0].exprUnit));
 }
@@ -1590,7 +1590,7 @@ yyreduce:
     break;
 
   case 41: /* BoolUnit: LP ComExpr RP  */
-#line 332 "parser.yacc"
+#line 333 "parser.yacc"
 {
   (yyval.boolUnit) = A_ComExprUnit((yyvsp[-2].pos), (yyvsp[-1].comExpr));
 }
@@ -1598,7 +1598,7 @@ yyreduce:
     break;
 
   case 42: /* BoolUnit: LP BoolExpr RP  */
-#line 336 "parser.yacc"
+#line 337 "parser.yacc"
 {
   (yyval.boolUnit) = A_BoolExprUnit((yyvsp[-2].pos), (yyvsp[-1].boolExpr));
 }
@@ -1606,7 +1606,7 @@ yyreduce:
     break;
 
   case 43: /* BoolUnit: BoolUOpExpr  */
-#line 340 "parser.yacc"
+#line 341 "parser.yacc"
 {
     (yyval.boolUnit)=A_BoolUOpExprUnit((yyvsp[0].boolUOpExpr)->pos, (yyvsp[0].boolUOpExpr));
 }
@@ -1614,7 +1614,7 @@ yyreduce:
     break;
 
   case 44: /* BoolUnit_: LP ComExpr RP  */
-#line 346 "parser.yacc"
+#line 347 "parser.yacc"
 {
   (yyval.boolUnit) = A_ComExprUnit((yyvsp[-2].pos), (yyvsp[-1].comExpr));
 }
@@ -1622,7 +1622,7 @@ yyreduce:
     break;
 
   case 45: /* BoolUnit_: LP BoolExpr RP  */
-#line 350 "parser.yacc"
+#line 351 "parser.yacc"
 {
   (yyval.boolUnit) = A_BoolExprUnit((yyvsp[-2].pos), (yyvsp[-1].boolExpr));
 }
@@ -1630,7 +1630,7 @@ yyreduce:
     break;
 
   case 46: /* BoolUnit_: LP BoolUOpExpr RP  */
-#line 354 "parser.yacc"
+#line 355 "parser.yacc"
 {
     (yyval.boolUnit)=A_BoolUOpExprUnit((yyvsp[-2].pos), (yyvsp[-1].boolUOpExpr));
 }
@@ -1638,7 +1638,7 @@ yyreduce:
     break;
 
   case 47: /* RightVal: ArithExpr  */
-#line 361 "parser.yacc"
+#line 362 "parser.yacc"
 {
     (yyval.rightVal) = A_ArithExprRVal((yyvsp[0].arithExpr)->pos, (yyvsp[0].arithExpr));
 }
@@ -1646,7 +1646,7 @@ yyreduce:
     break;
 
   case 48: /* LeftVal: ID  */
-#line 367 "parser.yacc"
+#line 368 "parser.yacc"
 {
     (yyval.leftVal) = A_IdExprLVal((yyvsp[0].tokenId)->pos, (yyvsp[0].tokenId)->id);
 }
@@ -1654,7 +1654,7 @@ yyreduce:
     break;
 
   case 49: /* LeftVal: ArrayExpr  */
-#line 371 "parser.yacc"
+#line 372 "parser.yacc"
 {
     (yyval.leftVal) = A_ArrExprLVal((yyvsp[0].arrayExpr)->pos, (yyvsp[0].arrayExpr));
 }
@@ -1662,7 +1662,7 @@ yyreduce:
     break;
 
   case 50: /* LeftVal: MemberExpr  */
-#line 375 "parser.yacc"
+#line 376 "parser.yacc"
 {
     (yyval.leftVal) = A_MemberExprLVal((yyvsp[0].memberExpr)->pos, (yyvsp[0].memberExpr));
 }
@@ -1670,7 +1670,7 @@ yyreduce:
     break;
 
   case 51: /* AssignStmt: LeftVal ASSIGN RightVal SEMICOLON  */
-#line 381 "parser.yacc"
+#line 382 "parser.yacc"
 {
     (yyval.assignStmt) = A_AssignStmt((yyvsp[-3].leftVal)->pos, (yyvsp[-3].leftVal), (yyvsp[-1].rightVal));
 }
@@ -1678,7 +1678,7 @@ yyreduce:
     break;
 
   case 52: /* VarDecl: ID COLON Type  */
-#line 387 "parser.yacc"
+#line 388 "parser.yacc"
 {
     (yyval.varDecl) = A_VarDecl_Scalar((yyvsp[-2].tokenId)->pos, A_VarDeclScalar((yyvsp[-2].tokenId)->pos, (yyvsp[-2].tokenId)->id, (yyvsp[0].type)));
 }
@@ -1686,7 +1686,7 @@ yyreduce:
     break;
 
   case 53: /* VarDecl: ArrayExpr COLON Type  */
-#line 391 "parser.yacc"
+#line 392 "parser.yacc"
 {
     (yyval.varDecl) = A_VarDecl_Array((yyvsp[-2].arrayExpr)->pos, A_VarDeclArray((yyvsp[-2].arrayExpr)->pos, (yyvsp[-2].arrayExpr)->arr->u.id, (yyvsp[-2].arrayExpr)->idx->u.num, (yyvsp[0].type)));
 }
@@ -1694,7 +1694,7 @@ yyreduce:
     break;
 
   case 54: /* VarDecl: ArrayExpr  */
-#line 395 "parser.yacc"
+#line 396 "parser.yacc"
 {
     (yyval.varDecl) = A_VarDecl_Array((yyvsp[0].arrayExpr)->pos, A_VarDeclArray((yyvsp[0].arrayExpr)->pos, (yyvsp[0].arrayExpr)->arr->u.id, (yyvsp[0].arrayExpr)->idx->u.num, nullptr));
 }
@@ -1702,7 +1702,7 @@ yyreduce:
     break;
 
   case 55: /* VarDecl: ID  */
-#line 399 "parser.yacc"
+#line 400 "parser.yacc"
 {
     (yyval.varDecl) = A_VarDecl_Scalar((yyvsp[0].tokenId)->pos, A_VarDeclScalar((yyvsp[0].tokenId)->pos, (yyvsp[0].tokenId)->id, nullptr));
 }
@@ -1710,7 +1710,7 @@ yyreduce:
     break;
 
   case 56: /* VarDef: ID COLON Type ASSIGN RightVal  */
-#line 405 "parser.yacc"
+#line 406 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Scalar((yyvsp[-4].tokenId)->pos, A_VarDefScalar((yyvsp[-4].tokenId)->pos, (yyvsp[-4].tokenId)->id, (yyvsp[-2].type), (yyvsp[0].rightVal)));
 }
@@ -1718,7 +1718,7 @@ yyreduce:
     break;
 
   case 57: /* VarDef: ID ASSIGN RightVal  */
-#line 409 "parser.yacc"
+#line 410 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Scalar((yyvsp[-2].tokenId)->pos, A_VarDefScalar((yyvsp[-2].tokenId)->pos, (yyvsp[-2].tokenId)->id, nullptr, (yyvsp[0].rightVal)));
 }
@@ -1726,7 +1726,7 @@ yyreduce:
     break;
 
   case 58: /* VarDef: ArrayExpr COLON Type ASSIGN LB RightValList RB  */
-#line 413 "parser.yacc"
+#line 414 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Array((yyvsp[-6].arrayExpr)->pos, A_VarDefArray((yyvsp[-6].arrayExpr)->pos, (yyvsp[-6].arrayExpr)->arr->u.id, (yyvsp[-6].arrayExpr)->idx->u.num, (yyvsp[-4].type), (yyvsp[-1].rightValList)));
 }
@@ -1734,7 +1734,7 @@ yyreduce:
     break;
 
   case 59: /* VarDef: ArrayExpr ASSIGN LB RightValList RB  */
-#line 417 "parser.yacc"
+#line 418 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Array((yyvsp[-4].arrayExpr)->pos, A_VarDefArray((yyvsp[-4].arrayExpr)->pos, (yyvsp[-4].arrayExpr)->arr->u.id, (yyvsp[-4].arrayExpr)->idx->u.num, nullptr, (yyvsp[-1].rightValList)));
 }
@@ -1742,7 +1742,7 @@ yyreduce:
     break;
 
   case 60: /* VarDef: ArrayExpr COLON Type ASSIGN LB RB  */
-#line 421 "parser.yacc"
+#line 422 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Array((yyvsp[-5].arrayExpr)->pos, A_VarDefArray((yyvsp[-5].arrayExpr)->pos, (yyvsp[-5].arrayExpr)->arr->u.id, (yyvsp[-5].arrayExpr)->idx->u.num, (yyvsp[-3].type), nullptr));
 }
@@ -1750,7 +1750,7 @@ yyreduce:
     break;
 
   case 61: /* VarDef: ArrayExpr ASSIGN LB RB  */
-#line 425 "parser.yacc"
+#line 426 "parser.yacc"
 {
     (yyval.varDef) = A_VarDef_Array((yyvsp[-3].arrayExpr)->pos, A_VarDefArray((yyvsp[-3].arrayExpr)->pos, (yyvsp[-3].arrayExpr)->arr->u.id, (yyvsp[-3].arrayExpr)->idx->u.num, nullptr, nullptr));
 }
@@ -1758,7 +1758,7 @@ yyreduce:
     break;
 
   case 62: /* VarDeclStmt: LET VarDecl SEMICOLON  */
-#line 432 "parser.yacc"
+#line 433 "parser.yacc"
 {
     (yyval.varDeclStmt) = A_VarDeclStmt((yyvsp[-2].pos), (yyvsp[-1].varDecl));
 }
@@ -1766,7 +1766,7 @@ yyreduce:
     break;
 
   case 63: /* VarDeclStmt: LET VarDef SEMICOLON  */
-#line 436 "parser.yacc"
+#line 437 "parser.yacc"
 {
     (yyval.varDeclStmt) = A_VarDefStmt((yyvsp[-2].pos), (yyvsp[-1].varDef));
 }
@@ -1774,7 +1774,7 @@ yyreduce:
     break;
 
   case 64: /* VarDeclList: VarDecl  */
-#line 442 "parser.yacc"
+#line 443 "parser.yacc"
 {
     (yyval.varDeclList) = A_VarDeclList((yyvsp[0].varDecl), nullptr);
 }
@@ -1782,7 +1782,7 @@ yyreduce:
     break;
 
   case 65: /* VarDeclList: VarDecl COMMA VarDeclList  */
-#line 446 "parser.yacc"
+#line 447 "parser.yacc"
 {
     (yyval.varDeclList) = A_VarDeclList((yyvsp[-2].varDecl), (yyvsp[0].varDeclList));
 }
@@ -1790,7 +1790,7 @@ yyreduce:
     break;
 
   case 66: /* StructDef: STRUCT ID LB VarDeclList RB  */
-#line 452 "parser.yacc"
+#line 453 "parser.yacc"
 {
     (yyval.structDef) = A_StructDef((yyvsp[-4].pos), (yyvsp[-3].tokenId)->id, (yyvsp[-1].varDeclList));
 }
@@ -1798,7 +1798,7 @@ yyreduce:
     break;
 
   case 67: /* FnDecl: FN ID LP ParamDecl RP  */
-#line 458 "parser.yacc"
+#line 459 "parser.yacc"
 {
     (yyval.fnDecl) = A_FnDecl((yyvsp[-4].pos), (yyvsp[-3].tokenId)->id, (yyvsp[-1].paramDecl), nullptr);
 }
@@ -1806,7 +1806,7 @@ yyreduce:
     break;
 
   case 68: /* FnDecl: FN ID LP ParamDecl RP ARROW Type  */
-#line 462 "parser.yacc"
+#line 463 "parser.yacc"
 {
     (yyval.fnDecl) = A_FnDecl((yyvsp[-6].pos), (yyvsp[-5].tokenId)->id, (yyvsp[-3].paramDecl), (yyvsp[0].type));
 }
@@ -1814,7 +1814,7 @@ yyreduce:
     break;
 
   case 69: /* ParamDecl: VarDeclList  */
-#line 469 "parser.yacc"
+#line 470 "parser.yacc"
 {
     (yyval.paramDecl) = A_ParamDecl((yyvsp[0].varDeclList));
 }
@@ -1822,7 +1822,7 @@ yyreduce:
     break;
 
   case 70: /* ParamDecl: %empty  */
-#line 473 "parser.yacc"
+#line 474 "parser.yacc"
 {
     (yyval.paramDecl) = A_ParamDecl(nullptr);
 }
@@ -1830,7 +1830,7 @@ yyreduce:
     break;
 
   case 71: /* CodeBlockStmtList: CodeBlockStmt CodeBlockStmtList  */
-#line 479 "parser.yacc"
+#line 480 "parser.yacc"
 {
     (yyval.codeBlockStmtList) = A_CodeBlockStmtList((yyvsp[-1].codeBlockStmt), (yyvsp[0].codeBlockStmtList));
 }
@@ -1838,7 +1838,7 @@ yyreduce:
     break;
 
   case 72: /* CodeBlockStmtList: CodeBlockStmt  */
-#line 483 "parser.yacc"
+#line 484 "parser.yacc"
 {
     (yyval.codeBlockStmtList) = A_CodeBlockStmtList((yyvsp[0].codeBlockStmt), nullptr);
 }
@@ -1846,7 +1846,7 @@ yyreduce:
     break;
 
   case 73: /* FnDef: FnDecl CodeBlock  */
-#line 489 "parser.yacc"
+#line 490 "parser.yacc"
 {
     (yyval.fnDef) = A_FnDef((yyvsp[-1].fnDecl)->pos, (yyvsp[-1].fnDecl), (yyvsp[0].codeBlockStmtList));
 }
@@ -1854,7 +1854,7 @@ yyreduce:
     break;
 
   case 74: /* IfStmt: IF BoolUnit_ CodeBlock ELSE CodeBlock  */
-#line 495 "parser.yacc"
+#line 496 "parser.yacc"
 {
     (yyval.ifStmt) = A_IfStmt((yyvsp[-4].pos), (yyvsp[-3].boolUnit), (yyvsp[-2].codeBlockStmtList), (yyvsp[0].codeBlockStmtList));
 }
@@ -1862,7 +1862,7 @@ yyreduce:
     break;
 
   case 75: /* IfStmt: IF BoolUnit_ CodeBlock  */
-#line 499 "parser.yacc"
+#line 500 "parser.yacc"
 {
     (yyval.ifStmt) = A_IfStmt((yyvsp[-2].pos), (yyvsp[-1].boolUnit), (yyvsp[0].codeBlockStmtList), nullptr);
 }
@@ -1870,7 +1870,7 @@ yyreduce:
     break;
 
   case 76: /* WhileStmt: WHILE BoolUnit_ CodeBlock  */
-#line 505 "parser.yacc"
+#line 506 "parser.yacc"
 {
     (yyval.whileStmt) = A_WhileStmt((yyvsp[-2].pos), (yyvsp[-1].boolUnit), (yyvsp[0].codeBlockStmtList));
 }
@@ -1878,7 +1878,7 @@ yyreduce:
     break;
 
   case 77: /* CallStmt: FnCall SEMICOLON  */
-#line 511 "parser.yacc"
+#line 512 "parser.yacc"
 {
     (yyval.callStmt) = A_CallStmt((yyvsp[-1].fnCall)->pos, (yyvsp[-1].fnCall));
 }
@@ -1886,7 +1886,7 @@ yyreduce:
     break;
 
   case 78: /* ReturnStmt: RETURN RightVal SEMICOLON  */
-#line 517 "parser.yacc"
+#line 518 "parser.yacc"
 {
     (yyval.returnStmt) = A_ReturnStmt((yyvsp[-2].pos), (yyvsp[-1].rightVal));
 }
@@ -1894,7 +1894,7 @@ yyreduce:
     break;
 
   case 79: /* ReturnStmt: RETURN SEMICOLON  */
-#line 521 "parser.yacc"
+#line 522 "parser.yacc"
 {
     (yyval.returnStmt) = A_ReturnStmt((yyvsp[-1].pos), nullptr);
 }
@@ -1902,7 +1902,7 @@ yyreduce:
     break;
 
   case 80: /* ContinueStmt: CONTINUE SEMICOLON  */
-#line 527 "parser.yacc"
+#line 528 "parser.yacc"
 {
     (yyval.pos) = (yyvsp[-1].pos);
 }
@@ -1910,7 +1910,7 @@ yyreduce:
     break;
 
   case 81: /* BreakStmt: BREAK SEMICOLON  */
-#line 533 "parser.yacc"
+#line 534 "parser.yacc"
 {
     (yyval.pos) = (yyvsp[-1].pos);
 }
@@ -1918,7 +1918,7 @@ yyreduce:
     break;
 
   case 82: /* CodeBlockStmt: SEMICOLON  */
-#line 539 "parser.yacc"
+#line 540 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockNullStmt((yyvsp[0].pos));
 }
@@ -1926,7 +1926,7 @@ yyreduce:
     break;
 
   case 83: /* CodeBlockStmt: VarDeclStmt  */
-#line 543 "parser.yacc"
+#line 544 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockVarDeclStmt((yyvsp[0].varDeclStmt)->pos, (yyvsp[0].varDeclStmt));
 }
@@ -1934,7 +1934,7 @@ yyreduce:
     break;
 
   case 84: /* CodeBlockStmt: AssignStmt  */
-#line 547 "parser.yacc"
+#line 548 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockAssignStmt((yyvsp[0].assignStmt)->pos, (yyvsp[0].assignStmt));
 }
@@ -1942,7 +1942,7 @@ yyreduce:
     break;
 
   case 85: /* CodeBlockStmt: CallStmt  */
-#line 551 "parser.yacc"
+#line 552 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockCallStmt((yyvsp[0].callStmt)->pos, (yyvsp[0].callStmt));
 }
@@ -1950,7 +1950,7 @@ yyreduce:
     break;
 
   case 86: /* CodeBlockStmt: IfStmt  */
-#line 555 "parser.yacc"
+#line 556 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockIfStmt((yyvsp[0].ifStmt)->pos, (yyvsp[0].ifStmt));
 }
@@ -1958,7 +1958,7 @@ yyreduce:
     break;
 
   case 87: /* CodeBlockStmt: WhileStmt  */
-#line 559 "parser.yacc"
+#line 560 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockWhileStmt((yyvsp[0].whileStmt)->pos, (yyvsp[0].whileStmt));
 }
@@ -1966,7 +1966,7 @@ yyreduce:
     break;
 
   case 88: /* CodeBlockStmt: ReturnStmt  */
-#line 563 "parser.yacc"
+#line 564 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockReturnStmt((yyvsp[0].returnStmt)->pos, (yyvsp[0].returnStmt));
 }
@@ -1974,7 +1974,7 @@ yyreduce:
     break;
 
   case 89: /* CodeBlockStmt: ContinueStmt  */
-#line 567 "parser.yacc"
+#line 568 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockContinueStmt((yyvsp[0].pos));
 }
@@ -1982,7 +1982,7 @@ yyreduce:
     break;
 
   case 90: /* CodeBlockStmt: BreakStmt  */
-#line 571 "parser.yacc"
+#line 572 "parser.yacc"
 {
     (yyval.codeBlockStmt) = A_BlockBreakStmt((yyvsp[0].pos));
 }
@@ -1990,7 +1990,7 @@ yyreduce:
     break;
 
   case 91: /* CodeBlock: LB RB  */
-#line 576 "parser.yacc"
+#line 577 "parser.yacc"
                 {
     (yyval.codeBlockStmtList) = nullptr;
 }
@@ -1998,7 +1998,7 @@ yyreduce:
     break;
 
   case 92: /* CodeBlock: LB CodeBlockStmtList RB  */
-#line 580 "parser.yacc"
+#line 581 "parser.yacc"
 {
     (yyval.codeBlockStmtList) = (yyvsp[-1].codeBlockStmtList);
 }
@@ -2006,7 +2006,7 @@ yyreduce:
     break;
 
   case 93: /* FnDeclStmt: FnDecl SEMICOLON  */
-#line 586 "parser.yacc"
+#line 587 "parser.yacc"
 {
     (yyval.fnDeclStmt) = A_FnDeclStmt((yyvsp[-1].fnDecl)->pos, (yyvsp[-1].fnDecl));
 }
@@ -2014,7 +2014,7 @@ yyreduce:
     break;
 
   case 94: /* ProgramElement: VarDeclStmt  */
-#line 592 "parser.yacc"
+#line 593 "parser.yacc"
 {
   (yyval.programElement) = A_ProgramVarDeclStmt((yyvsp[0].varDeclStmt)->pos, (yyvsp[0].varDeclStmt));
 }
@@ -2022,7 +2022,7 @@ yyreduce:
     break;
 
   case 95: /* ProgramElement: StructDef  */
-#line 596 "parser.yacc"
+#line 597 "parser.yacc"
 {
   (yyval.programElement) = A_ProgramStructDef((yyvsp[0].structDef)->pos, (yyvsp[0].structDef));
 }
@@ -2030,7 +2030,7 @@ yyreduce:
     break;
 
   case 96: /* ProgramElement: FnDeclStmt  */
-#line 600 "parser.yacc"
+#line 601 "parser.yacc"
 {
   (yyval.programElement) = A_ProgramFnDeclStmt((yyvsp[0].fnDeclStmt)->pos, (yyvsp[0].fnDeclStmt));
 }
@@ -2038,7 +2038,7 @@ yyreduce:
     break;
 
   case 97: /* ProgramElement: FnDef  */
-#line 604 "parser.yacc"
+#line 605 "parser.yacc"
 {
   (yyval.programElement) = A_ProgramFnDef((yyvsp[0].fnDef)->pos, (yyvsp[0].fnDef));
 }
@@ -2046,7 +2046,7 @@ yyreduce:
     break;
 
   case 98: /* ProgramElement: SEMICOLON  */
-#line 608 "parser.yacc"
+#line 609 "parser.yacc"
 {
   (yyval.programElement) = A_ProgramNullStmt((yyvsp[0].pos));
 }
@@ -2247,7 +2247,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 616 "parser.yacc"
+#line 617 "parser.yacc"
 
 
 extern "C"{

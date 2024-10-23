@@ -89,6 +89,7 @@ A_tokenNum tokenNum;
 %left OR
 %left AND 
 %left EQ NE
+
 %left LT GT LE GE 
 %left ADD SUB
 %left MUL DIV

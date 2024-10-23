@@ -24,14 +24,14 @@ int main(int argc, char * argv[]) {
     #if YACCDEBUG
         yydebug = 1;
     #endif
-
+    std::cout<<argv[1]<<endl;
     line = 1;
     col = 1;
     
     freopen(argv[1], "r", stdin);  
     ofstream ASTStream;
     ASTStream.open(argv[2]);
-
+    
     yyparse();
     
     aroot = aA_Program(root);
