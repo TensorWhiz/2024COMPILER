@@ -419,7 +419,6 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
         }
             break;
         case A_leftValType::A_arrValKind:{
-            name = *as->leftVal->u.arrExpr->arr->u.id;
             /* fill code here */
             tc_type tc_tp=get_type_(curr_map,name);
             //没找到--保错
