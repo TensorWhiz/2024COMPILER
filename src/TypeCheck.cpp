@@ -117,6 +117,9 @@ tc_type get_type_(typeMap* pmap, string tokenID){
         return funcparam_token2Type[tokenID];
     if(pmap->find(tokenID) != pmap->end())
         return (*pmap)[tokenID];
+    // if(g_token2Type.find(tokenID)!=g_token2Type.end())
+    //     return g_token2Type[tokenID];
+
         
     return nullptr;
 }
@@ -171,8 +174,10 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
             //check_isStructTypeDefined(out, vdecl->u.declArray->type);    
         }
         //curr_map局部不冲突即可
-        if(get_type_(curr_map, name) != nullptr)
-                error_print(out, vdecl->pos, "This id is already defined! ");
+        if(get_type_(curr_map, name) != nullptr){
+            error_print(out, vdecl->pos, "This id is already defined! ");
+            return;
+        }
         tc_type t = tc_Type(vdecl);
         curr_map->insert({name, t});
 
@@ -202,7 +207,7 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
                 return;
             }
             else{
-                error_print(out, vd->pos, "Assignment type does not match variable type!");
+                error_print(out, vd->pos, "Assignment type does not match variable type!1");
                 return;
             }
 
@@ -224,13 +229,13 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
             tc_type t = check_rightVal(out, varDefArray->vals[0]);
             // 检查是否缺省类型
             if(varDefArray->type != nullptr && !comp_tc_type(t, tc_Type(varDefArray->type, 0))){
-                error_print(out, vd->pos, "Assignment type does not match variable type!");
+                error_print(out, vd->pos, "Assignment type does not match variable type!2");
                 return;
             }
 
             for(aA_rightVal rv: varDefArray->vals){
                     if(!comp_tc_type(t,check_rightVal(out, rv))){
-                        error_print(out, vd->pos, "Assignment type does not match variable type!");
+                        error_print(out, vd->pos, "Assignment type does not match variable type!3");
                         return;
                     }     
             }
@@ -278,7 +283,11 @@ void check_FnDecl(std::ostream& out, aA_fnDecl fd){
                 return;
             }
 
+            
+
             if(paramType == A_varDeclType::A_varDeclScalarKind){
+               
+
                 if(!comp_aA_type(func2Param[name]->at(i)->u.declScalar->type, fd->paramDecl->varDecls[i]->u.declScalar->type)){
                     error_print(out, fd->pos, "The function parameter type does not match declaration!");
                     return;
@@ -286,6 +295,8 @@ void check_FnDecl(std::ostream& out, aA_fnDecl fd){
 
             }
             else { // A_varDeclType::A_varDefArrayKind
+                
+
                 if(!comp_aA_type(func2Param[name]->at(i)->u.declArray->type, fd->paramDecl->varDecls[i]->u.declArray->type)){
                     error_print(out, fd->pos, "The function parameter type does not match declaration!");
                     return;
@@ -309,7 +320,7 @@ void check_FnDeclStmt(std::ostream& out, aA_fnDeclStmt fd){
         return;
     check_FnDecl(out, fd->fnDecl);
     return;
-}
+} 
 
 void check_FnDef(std::ostream& out, aA_fnDef fd)
 {
@@ -321,10 +332,21 @@ void check_FnDef(std::ostream& out, aA_fnDef fd)
     for (aA_varDecl vd : fd->fnDecl->paramDecl->varDecls)
     {
         /* fill code here */
+
         if(vd->kind==A_varDeclType::A_varDeclScalarKind){
+
+            if(get_type_(&g_token2Type, *vd->u.declScalar->id)!=nullptr){
+                    error_print(out,vd->pos, "duplicate definition!");
+                    return;
+            }
             funcparam_token2Type[*vd->u.declScalar->id]=tc_Type(vd);
         }
         else if(vd->kind==A_varDeclType::A_varDeclArrayKind){
+            if(get_type_(&g_token2Type, *vd->u.declArray->id)!=nullptr){
+                    error_print(out,vd->pos, "duplicate definition!");
+                    return;
+                }
+            
             funcparam_token2Type[*vd->u.declArray->id]=tc_Type(vd);
         }
         else{
@@ -411,7 +433,7 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
             }
             else{
                 if(!comp_tc_type(tc_tp, deduced_type)){
-                    error_print(out, as->pos, "Assignment type does not match variable type!");
+                    error_print(out, as->pos, "Assignment type does not match variable type!4");
                     return;
                 }
        
@@ -420,6 +442,7 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
             break;
         case A_leftValType::A_arrValKind:{
             /* fill code here */
+            name = *as->leftVal->u.arrExpr->arr->u.id;
             tc_type tc_tp=get_type_(curr_map,name);
             //没找到--保错
             if(tc_tp == nullptr)
@@ -429,8 +452,8 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
                 g_token2Type.find(name)->second = deduced_type;
             }
             else{
-                if(!comp_tc_type(tc_tp, deduced_type)){
-                   error_print(out, as->pos, "Assignment type does not match variable type!"); 
+                if(!comp_tc_type(tc_tp, tc_Type(deduced_type->type,1))){
+                   error_print(out, as->pos, "Assignment type does not match variable type!5"); 
                    return;
                 }
      
@@ -616,7 +639,7 @@ void check_BoolUnit(std::ostream& out, aA_boolUnit bu){
             tc_type leftType = check_ExprUnit(out, comExpr->left);
             tc_type rightType = check_ExprUnit(out, comExpr->right);
             if(!comp_tc_type(leftType, rightType)){
-                error_print(out, bu->pos, "Comparison type does not match!");
+                error_print(out, leftType->type->pos, "Comparison type does not match!");
             }
 
               
@@ -759,7 +782,7 @@ void check_FuncCall(std::ostream& out, aA_fnCall fc){
         /* fill code here */
         // 检查参数值类型是否与函数定义保持一致
         if(!comp_tc_type(tc_Type(func2Param[func_name]->at(i)), check_rightVal(out, fc->vals[i])))
-            error_print(out, fc->pos, "Function parameter kind does not match declaration!");
+            error_print(out, fc->vals[i]->pos, "Function parameter kind does not match declaration!");
     }
     return ;
 }
