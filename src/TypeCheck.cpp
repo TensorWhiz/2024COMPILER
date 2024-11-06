@@ -16,7 +16,7 @@ typeMap * curr_map = &g_token2Type;
 arrayLengthMap array2Length;
 //当前函数
 string curr_func = "";
-// 记录函数参数
+// 记录函数参数 
 paramMemberMap func2Param;
 // 记录结构体成员
 paramMemberMap struct2Members;
@@ -166,12 +166,12 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
         if(vdecl->kind == A_varDeclType::A_varDeclScalarKind){
             /* fill code here*/
             name = *vdecl->u.declScalar->id;    
-            //check_isStructTypeDefined(out, vdecl->u.declScalar->type);      
+            check_isStructTypeDefined(out, vdecl->u.declScalar->type);      
         }
         else{ //vdecl->kind == A_varDeclType::A_varDeclArrayKind
             /* fill code here*/
             name = *vdecl->u.declArray->id;
-            //check_isStructTypeDefined(out, vdecl->u.declArray->type);    
+            check_isStructTypeDefined(out, vdecl->u.declArray->type);    
         }
         //curr_map局部不冲突即可
         if(get_type_(curr_map, name) != nullptr){
@@ -193,7 +193,7 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
                 error_print(out, vdef->pos, "This id is already defined! ");
                 return;
             }
-            //check_isStructTypeDefined(out, varDefScalar->type);
+            check_isStructTypeDefined(out, varDefScalar->type);
             tc_type t = check_rightVal(out, varDefScalar->val);
             
             // 处理缺省类型
@@ -220,12 +220,12 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
                 error_print(out, vdef->pos, "This id is already defined! ");
                 return;
             }
-           // check_isStructTypeDefined(out, varDefArray->type);
+           check_isStructTypeDefined(out, varDefArray->type);
             if(varDefArray->len!=varDefArray->vals.size()){
                 error_print(out, vdef->pos, "Length mismatch! ");
                 return;
             }
-            //array2Length[name] = varDefArray->len;
+            array2Length[name] = varDefArray->len;
             tc_type t = check_rightVal(out, varDefArray->vals[0]);
             // 检查是否缺省类型
             if(varDefArray->type != nullptr && !comp_tc_type(t, tc_Type(varDefArray->type, 0))){
@@ -239,7 +239,7 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
                         return;
                     }     
             }
-            g_token2Type.insert({name, tc_Type(varDefArray->type, 1)});
+            curr_map->insert({name, tc_Type(varDefArray->type, 1)});
         }
 
     }
@@ -429,7 +429,7 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
             }
             //找到--1.没类型 2.1 有类型不匹配 2.2 有类型匹配
             if(tc_tp->type == nullptr){
-                g_token2Type.find(name)->second = deduced_type;
+                curr_map->find(name)->second = deduced_type;
             }
             else{
                 if(!comp_tc_type(tc_tp, deduced_type)){
@@ -449,7 +449,7 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
                 error_print(out, as->pos, "Variable not defined!");
             //找到--1.没类型 2.1 有类型不匹配 2.2 有类型匹配
             if(tc_tp->type == nullptr){
-                g_token2Type.find(name)->second = deduced_type;
+                curr_map->find(name)->second = deduced_type;
             }
             else{
                 if(!comp_tc_type(tc_tp, tc_Type(deduced_type->type,1))){
