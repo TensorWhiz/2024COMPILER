@@ -117,8 +117,8 @@ tc_type get_type_(typeMap* pmap, string tokenID){
         return funcparam_token2Type[tokenID];
     if(pmap->find(tokenID) != pmap->end())
         return (*pmap)[tokenID];
-    // if(g_token2Type.find(tokenID)!=g_token2Type.end())
-    //     return g_token2Type[tokenID];
+    if(g_token2Type.find(tokenID)!=g_token2Type.end())
+         return g_token2Type[tokenID];
 
         
     return nullptr;
