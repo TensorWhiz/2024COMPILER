@@ -22,7 +22,7 @@ test_single() {
     	lli ./output/$test_name.ll > ./output/$test_name.out
 	fi
 	echo -e $? >> ./output/$test_name.out
-	diff -Bb ./output/$test_name.out $func_testcase_dir/$test_name.out > /dev/null 2>/dev/null
+	diff -Bb ./output/$test_name.out $func_testcase_dir/$test_name.out > ./output/$test_name.txt
 	if [ $? == 0 ]; then
         echo pass; 
 	else

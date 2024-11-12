@@ -1,8 +1,10 @@
 #include <fstream>
 #include <iostream>
+#include <iostream>
 #include "TeaplAst.h"
 #include "TeaplaAst.h"
 #include "PrintTeaplaAst.h"
+#include "TypeCheck.h"
 #include "TypeCheck.h"
 #include "y.tab.hpp"
 #include "llvm_ir.h"
@@ -28,7 +30,7 @@ int main(int argc, char * argv[]) {
     #if YACCDEBUG
         yydebug = 1;
     #endif
-
+    std::cout<<argv[1]<<endl;
     line = 1;
     col = 1;
 
@@ -47,6 +49,7 @@ int main(int argc, char * argv[]) {
 
     yyparse();
     
+    
     aroot = aA_Program(root);
     // print_aA_Program(aroot, ASTStream);
     // ASTStream.close();
@@ -61,4 +64,6 @@ int main(int argc, char * argv[]) {
 
     return 0;
 }
+
+
 
