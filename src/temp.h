@@ -7,17 +7,22 @@ enum class TempType
 {
     INT_TEMP,
     INT_PTR,
-    STRUCT_TEMP,
+    STRUCT_TEMP,//只存在于全局变量
     STRUCT_PTR
 };
-
+//IR中寄存器的抽象
 struct Temp_temp
 {
     int num;
+    //寄存器编号
     TempType type;
+    //寄存器中元素的类型
     std::string structname;
+    //如果该寄存器和结构体有关则structname是其结构体的名字
     std::string varname;
+    //用于debug
     int len;
+    //用于区分指针和数组，当len为0时代表单个元素的指针，当len为-1时代表数组头指针，这种情况只在数组作为函数参数时存在，当len大于0时代表数组的长度
     Temp_temp(int _num,TempType _type = TempType::INT_TEMP,int _len = 0,const std::string& _sname = std::string());
 };
 
@@ -45,6 +50,7 @@ struct TempDef
     TempDef(TempType _kind = TempType::INT_TEMP,int _len = 0,const std::string &_structname = std::string());
 };
 
+//标签的抽象
 struct Temp_label
 {
     std::string name;
@@ -54,11 +60,12 @@ struct Temp_label
 Temp_label* Temp_newlabel();
 Temp_label* Temp_newlabel_named(const std::string &name);
 
+//全局变量的抽象
 struct Name_name
 {
-    Temp_label *name;
-    TempType type;
-    std::string structname;
+    Temp_label *name;//全局变量的name
+    TempType type;//元素的类型
+    std::string structname;//如果该全局变量和结构体有关则structname是其结构体的名字
     int len;
     Name_name(Temp_label *_name,TempType _type,int _len = 0,const std::string &_structname = std::string());
 };
@@ -72,7 +79,7 @@ enum class OperandKind
 {
     TEMP, NAME, ICONST
 };
-
+//指令中的运算对象
 struct AS_operand 
 {
     OperandKind kind;

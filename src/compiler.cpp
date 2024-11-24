@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <iostream>
 #include "TeaplAst.h"
 #include "TeaplaAst.h"
 #include "PrintTeaplaAst.h"
@@ -31,7 +32,7 @@ int main(int argc, char * argv[]) {
     #if YACCDEBUG
         yydebug = 1;
     #endif
-
+    std::cout<<argv[1]<<endl;
     line = 1;
     col = 1;
 
@@ -46,13 +47,14 @@ int main(int argc, char * argv[]) {
     
     freopen(argv[1], "r", stdin);  
     ofstream ASTStream;
-    // ASTStream.open(file_name+".ast");
+    ASTStream.open(file_name+".ast");
 
     yyparse();
     
+    
     aroot = aA_Program(root);
-    // print_aA_Program(aroot, ASTStream);
-    // ASTStream.close();
+    print_aA_Program(aroot, ASTStream);
+    ASTStream.close();
 
     // check_Prog(std::cout, aroot);
 
@@ -66,4 +68,6 @@ int main(int argc, char * argv[]) {
     printf("exit\n");
     return 0;
 }
+
+
 
