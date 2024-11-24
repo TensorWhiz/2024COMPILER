@@ -45,3 +45,4 @@ typedef std::unordered_map<string, int> arrayLengthMap;
 void enter_scope();
 void leave_scope();
 typedef std::vector<string> funcSet; 
+typedef std::unordered_map<string,aA_varDecl> deduced_map;

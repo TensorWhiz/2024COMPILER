@@ -86,13 +86,11 @@ if_5_23_true:
   %r123 = load i32, i32* %r102
   %r124 = sub i32 0, %r123
   ret i32 %r124
-bb1:
   br label %if_5_23_end
 
 if_5_23_false:
   %r125 = load i32, i32* %r102
   ret i32 %r125
-bb2:
   br label %if_5_23_end
 
 if_5_23_end:
@@ -112,9 +110,9 @@ addedge:
   %r133 = load i32, i32* @cnt
   %r134 = getelementptr [5005 x i32 ], [5005 x i32 ]* @next, i32 0, i32 %r133
   %r135 = load i32, i32* %r127
-  %r136 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r135
-  %r137 = load i32, i32* %r136
-  store i32 %r137, i32* %r134
+  %r137 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r135
+  %r136 = load i32, i32* %r137
+  store i32 %r136, i32* %r134
   %r138 = load i32, i32* %r127
   %r139 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r138
   %r140 = load i32, i32* @cnt
@@ -129,9 +127,9 @@ addedge:
   %r146 = load i32, i32* @cnt
   %r147 = getelementptr [5005 x i32 ], [5005 x i32 ]* @next, i32 0, i32 %r146
   %r148 = load i32, i32* %r129
-  %r149 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r148
-  %r150 = load i32, i32* %r149
-  store i32 %r150, i32* %r147
+  %r150 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r148
+  %r149 = load i32, i32* %r150
+  store i32 %r149, i32* %r147
   %r151 = load i32, i32* %r129
   %r152 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r151
   %r153 = load i32, i32* @cnt
@@ -191,13 +189,13 @@ popqueue:
   store i32 %r174, i32* @h
   %r175 = alloca i32
   %r176 = load i32, i32* @h
-  %r177 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r176
-  %r178 = load i32, i32* %r177
-  store i32 %r178, i32* %r175
+  %r178 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r176
+  %r177 = load i32, i32* %r178
+  store i32 %r177, i32* %r175
   %r179 = load i32, i32* @h
-  %r180 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r179
-  %r181 = load i32, i32* %r180
-  ret i32 %r181
+  %r181 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r179
+  %r180 = load i32, i32* %r181
+  ret i32 %r180
 }
 
 define i32 @same( i32 %r182, i32 %r184 ) {
@@ -210,65 +208,65 @@ same:
   store i32 0, i32* @tail
   %r186 = load i32, i32* %r183
   call void @inqueue(i32 %r186)
-  %r187 = alloca i32
-  store i32 0, i32* %r187
   %r188 = alloca i32
   store i32 0, i32* %r188
   %r189 = alloca i32
   store i32 0, i32* %r189
   %r190 = alloca i32
   store i32 0, i32* %r190
+  %r191 = alloca i32
+  store i32 0, i32* %r191
   br label %while_5_80_cond
 
 while_5_80_cond:
-  %r191 = load i32, i32* @h
-  %r192 = load i32, i32* @tail
-  %r193 = icmp slt i32 %r191, %r192
-  br i1 %r193, label %while_5_80_whilestms, label %while_5_80_bre
+  %r192 = load i32, i32* @h
+  %r193 = load i32, i32* @tail
+  %r194 = icmp slt i32 %r192, %r193
+  br i1 %r194, label %while_5_80_whilestms, label %while_5_80_bre
 
 while_5_80_whilestms:
-  %r194 = call i32 @popqueue()
-  store i32 %r194, i32* %r188
-  %r195 = load i32, i32* %r188
-  %r196 = load i32, i32* %r185
-  %r197 = icmp eq i32 %r195, %r196
-  br i1 %r197, label %if_9_82_true, label %if_9_82_false
+  %r195 = call i32 @popqueue()
+  store i32 %r195, i32* %r189
+  %r196 = load i32, i32* %r189
+  %r197 = load i32, i32* %r185
+  %r198 = icmp eq i32 %r196, %r197
+  br i1 %r198, label %if_9_82_true, label %if_9_82_false
 
 if_9_82_true:
-  store i32 1, i32* %r187
+  store i32 1, i32* %r188
   br label %if_9_82_end
 
 if_9_82_false:
   br label %if_9_82_end
 
 if_9_82_end:
-  %r198 = load i32, i32* %r188
-  %r199 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r198
-  %r200 = load i32, i32* %r199
-  store i32 %r200, i32* %r189
+  %r199 = load i32, i32* %r189
+  %r201 = getelementptr [1005 x i32 ], [1005 x i32 ]* @head, i32 0, i32 %r199
+  %r200 = load i32, i32* %r201
+  store i32 %r200, i32* %r190
   br label %while_9_86_cond
 
 while_9_86_cond:
-  %r201 = load i32, i32* %r189
-  %r202 = sub i32 0, 1
-  %r203 = icmp ne i32 %r201, %r202
-  br i1 %r203, label %while_9_86_whilestms, label %while_9_86_bre
+  %r202 = load i32, i32* %r190
+  %r203 = sub i32 0, 1
+  %r204 = icmp ne i32 %r202, %r203
+  br i1 %r204, label %while_9_86_whilestms, label %while_9_86_bre
 
 while_9_86_whilestms:
-  %r204 = load i32, i32* %r189
-  %r205 = getelementptr [5005 x i32 ], [5005 x i32 ]* @to, i32 0, i32 %r204
-  %r206 = load i32, i32* %r205
-  store i32 %r206, i32* %r190
-  %r207 = load i32, i32* %r190
-  %r208 = getelementptr [1005 x i32 ], [1005 x i32 ]* @inq, i32 0, i32 %r207
-  %r209 = load i32, i32* %r208
-  %r210 = icmp eq i32 %r209, 0
-  br i1 %r210, label %if_13_88_true, label %if_13_88_false
+  %r205 = load i32, i32* %r190
+  %r207 = getelementptr [5005 x i32 ], [5005 x i32 ]* @to, i32 0, i32 %r205
+  %r206 = load i32, i32* %r207
+  store i32 %r206, i32* %r191
+  %r208 = load i32, i32* %r191
+  %r210 = getelementptr [1005 x i32 ], [1005 x i32 ]* @inq, i32 0, i32 %r208
+  %r209 = load i32, i32* %r210
+  %r211 = icmp eq i32 %r209, 0
+  br i1 %r211, label %if_13_88_true, label %if_13_88_false
 
 if_13_88_true:
-  %r211 = load i32, i32* %r189
-  %r212 = getelementptr [5005 x i32 ], [5005 x i32 ]* @to, i32 0, i32 %r211
-  %r213 = load i32, i32* %r212
+  %r212 = load i32, i32* %r190
+  %r214 = getelementptr [5005 x i32 ], [5005 x i32 ]* @to, i32 0, i32 %r212
+  %r213 = load i32, i32* %r214
   call void @inqueue(i32 %r213)
   br label %if_13_88_end
 
@@ -276,114 +274,114 @@ if_13_88_false:
   br label %if_13_88_end
 
 if_13_88_end:
-  %r214 = load i32, i32* %r189
-  %r215 = getelementptr [5005 x i32 ], [5005 x i32 ]* @next, i32 0, i32 %r214
-  %r216 = load i32, i32* %r215
-  store i32 %r216, i32* %r189
+  %r216 = load i32, i32* %r190
+  %r218 = getelementptr [5005 x i32 ], [5005 x i32 ]* @next, i32 0, i32 %r216
+  %r217 = load i32, i32* %r218
+  store i32 %r217, i32* %r190
   br label %while_9_86_cond
 
 while_9_86_bre:
   br label %while_5_80_cond
 
 while_5_80_bre:
-  store i32 0, i32* %r189
+  store i32 0, i32* %r190
   br label %while_5_95_cond
 
 while_5_95_cond:
-  %r217 = load i32, i32* %r189
-  %r218 = load i32, i32* @tail
-  %r219 = icmp sle i32 %r217, %r218
-  br i1 %r219, label %while_5_95_whilestms, label %while_5_95_bre
+  %r219 = load i32, i32* %r190
+  %r220 = load i32, i32* @tail
+  %r221 = icmp sle i32 %r219, %r220
+  br i1 %r221, label %while_5_95_whilestms, label %while_5_95_bre
 
 while_5_95_whilestms:
-  %r220 = load i32, i32* %r189
-  %r221 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r220
-  %r222 = load i32, i32* %r221
-  store i32 %r222, i32* %r190
-  %r223 = load i32, i32* %r190
-  %r224 = getelementptr [1005 x i32 ], [1005 x i32 ]* @inq, i32 0, i32 %r223
-  store i32 0, i32* %r224
-  %r225 = load i32, i32* %r189
-  %r226 = add i32 %r225, 1
-  store i32 %r226, i32* %r189
+  %r222 = load i32, i32* %r190
+  %r224 = getelementptr [1005 x i32 ], [1005 x i32 ]* @que, i32 0, i32 %r222
+  %r223 = load i32, i32* %r224
+  store i32 %r223, i32* %r191
+  %r225 = load i32, i32* %r191
+  %r226 = getelementptr [1005 x i32 ], [1005 x i32 ]* @inq, i32 0, i32 %r225
+  store i32 0, i32* %r226
+  %r227 = load i32, i32* %r190
+  %r228 = add i32 %r227, 1
+  store i32 %r228, i32* %r190
   br label %while_5_95_cond
 
 while_5_95_bre:
-  %r227 = load i32, i32* %r187
-  ret i32 %r227
+  %r229 = load i32, i32* %r188
+  ret i32 %r229
 }
 
 define i32 @main( ) {
 main:
-  %r228 = call i32 @quickread()
-  store i32 %r228, i32* @n
-  %r229 = call i32 @quickread()
-  store i32 %r229, i32* @m
+  %r230 = call i32 @quickread()
+  store i32 %r230, i32* @n
+  %r231 = call i32 @quickread()
+  store i32 %r231, i32* @m
   call void @init()
-  %r230 = alloca i32
-  store i32 0, i32* %r230
-  %r231 = alloca i32
-  store i32 0, i32* %r231
-  %r232 = alloca i32
-  store i32 0, i32* %r232
+  %r233 = alloca i32
+  store i32 0, i32* %r233
+  %r234 = alloca i32
+  store i32 0, i32* %r234
+  %r235 = alloca i32
+  store i32 0, i32* %r235
   br label %while_5_109_cond
 
 while_5_109_cond:
-  %r233 = load i32, i32* @m
-  %r234 = icmp ne i32 %r233, 0
-  br i1 %r234, label %while_5_109_whilestms, label %while_5_109_bre
+  %r236 = load i32, i32* @m
+  %r237 = icmp ne i32 %r236, 0
+  br i1 %r237, label %while_5_109_whilestms, label %while_5_109_bre
 
 while_5_109_whilestms:
-  %r235 = call i32 @getch()
-  store i32 %r235, i32* %r230
+  %r238 = call i32 @getch()
+  store i32 %r238, i32* %r233
   br label %while_9_111_cond
 
 while_9_111_cond:
-  %r236 = load i32, i32* %r230
-  %r237 = icmp ne i32 %r236, 81
-  br i1 %r237, label %bb30_111_next, label %while_9_111_bre
+  %r239 = load i32, i32* %r233
+  %r240 = icmp ne i32 %r239, 81
+  br i1 %r240, label %bb30_111_next, label %while_9_111_bre
 
 bb30_111_next:
-  %r238 = load i32, i32* %r230
-  %r239 = icmp ne i32 %r238, 85
-  br i1 %r239, label %while_9_111_whilestms, label %while_9_111_bre
+  %r241 = load i32, i32* %r233
+  %r242 = icmp ne i32 %r241, 85
+  br i1 %r242, label %while_9_111_whilestms, label %while_9_111_bre
 
 while_9_111_whilestms:
-  %r240 = call i32 @getch()
-  store i32 %r240, i32* %r230
+  %r243 = call i32 @getch()
+  store i32 %r243, i32* %r233
   br label %while_9_111_cond
 
 while_9_111_bre:
-  %r241 = load i32, i32* %r230
-  %r242 = icmp eq i32 %r241, 81
-  br i1 %r242, label %if_9_114_true, label %if_9_114_false
+  %r244 = load i32, i32* %r233
+  %r245 = icmp eq i32 %r244, 81
+  br i1 %r245, label %if_9_114_true, label %if_9_114_false
 
 if_9_114_true:
-  %r243 = call i32 @quickread()
-  store i32 %r243, i32* %r231
-  %r244 = call i32 @quickread()
-  store i32 %r244, i32* %r232
-  %r245 = load i32, i32* %r231
-  %r246 = load i32, i32* %r232
-  %r247 = call i32 @same(i32 %r245, i32 %r246)
-  call void @putint(i32 %r247)
+  %r246 = call i32 @quickread()
+  store i32 %r246, i32* %r234
+  %r247 = call i32 @quickread()
+  store i32 %r247, i32* %r235
+  %r248 = load i32, i32* %r234
+  %r249 = load i32, i32* %r235
+  %r250 = call i32 @same(i32 %r248, i32 %r249)
+  call void @putint(i32 %r250)
   call void @putch(i32 10)
   br label %if_9_114_end
 
 if_9_114_false:
-  %r248 = call i32 @quickread()
-  store i32 %r248, i32* %r231
-  %r249 = call i32 @quickread()
-  store i32 %r249, i32* %r232
-  %r250 = load i32, i32* %r231
-  %r251 = load i32, i32* %r232
-  call void @addedge(i32 %r250, i32 %r251)
+  %r253 = call i32 @quickread()
+  store i32 %r253, i32* %r234
+  %r254 = call i32 @quickread()
+  store i32 %r254, i32* %r235
+  %r255 = load i32, i32* %r234
+  %r256 = load i32, i32* %r235
+  call void @addedge(i32 %r255, i32 %r256)
   br label %if_9_114_end
 
 if_9_114_end:
-  %r252 = load i32, i32* @m
-  %r253 = sub i32 %r252, 1
-  store i32 %r253, i32* @m
+  %r258 = load i32, i32* @m
+  %r259 = sub i32 %r258, 1
+  store i32 %r259, i32* @m
   br label %while_5_109_cond
 
 while_5_109_bre:

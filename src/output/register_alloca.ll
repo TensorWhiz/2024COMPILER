@@ -617,8 +617,8 @@ main:
   store i32 %r569, i32* %r561, align 4
   %r570 = load i32, i32* %r561, align 4
   call void @putint(i32 %r570)
-  %r571 = load i32, i32* %r561, align 4
-  ret i32 %r571
+  %r572 = load i32, i32* %r561, align 4
+  ret i32 %r572
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable

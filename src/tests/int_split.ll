@@ -79,16 +79,16 @@ while_5_43_cond:
 
 while_5_43_whilestms:
   %r136 = load i32, i32* %r127
-  %r137 = getelementptr [4 x i32 ], [4 x i32 ]* %r129, i32 0, i32 %r136
-  %r138 = load i32, i32* %r137
-  store i32 %r138, i32* %r133
+  %r138 = getelementptr [4 x i32 ], [4 x i32 ]* %r129, i32 0, i32 %r136
+  %r137 = load i32, i32* %r138
+  store i32 %r137, i32* %r133
   %r139 = load i32, i32* %r133
   call void @putint(i32 %r139)
-  %r140 = load i32, i32* @newline
-  call void @putch(i32 %r140)
-  %r141 = load i32, i32* %r127
-  %r142 = add i32 %r141, 1
-  store i32 %r142, i32* %r127
+  %r141 = load i32, i32* @newline
+  call void @putch(i32 %r141)
+  %r143 = load i32, i32* %r127
+  %r144 = add i32 %r143, 1
+  store i32 %r144, i32* %r127
   br label %while_5_43_cond
 
 while_5_43_bre:

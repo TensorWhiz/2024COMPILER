@@ -28,7 +28,6 @@ bb20_10_next:
 
 if_5_10_true:
   ret i32 1
-bb1:
   br label %if_5_10_end
 
 if_5_10_false:
@@ -129,12 +128,12 @@ while_9_36_whilestms:
   %r162 = load i32, i32* %r111
   %r163 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 %r162
   %r164 = load i32, i32* %r112
-  %r165 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 %r164
-  %r166 = load i32, i32* %r165
+  %r166 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 %r164
+  %r165 = load i32, i32* %r166
   %r167 = load i32, i32* %r113
-  %r168 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 %r167
-  %r169 = load i32, i32* %r168
-  %r170 = add i32 %r166, %r169
+  %r169 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 %r167
+  %r168 = load i32, i32* %r169
+  %r170 = add i32 %r165, %r168
   store i32 %r170, i32* %r163
   %r171 = load i32, i32* %r110
   %r172 = sub i32 %r171, 1
@@ -148,9 +147,9 @@ while_9_36_bre:
   br label %while_5_34_cond
 
 while_5_34_bre:
-  %r175 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 0
-  %r176 = load i32, i32* %r175
-  ret i32 %r176
+  %r176 = getelementptr [9 x i32 ], [9 x i32 ]* %r108, i32 0, i32 0
+  %r175 = load i32, i32* %r176
+  ret i32 %r175
 }
 
 define i32 @main( ) {

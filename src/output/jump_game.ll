@@ -44,30 +44,30 @@ canJump:
 if_5_10_true:                                     ; preds = %canJump
   ret i32 1
 
-bb1:                                              ; No predecessors!
+0:                                                ; No predecessors!
   br label %if_5_10_end
 
 if_5_10_false:                                    ; preds = %canJump
   br label %if_5_10_end
 
-if_5_10_end:                                      ; preds = %if_5_10_false, %bb1
-  %r105 = getelementptr i32, i32* %r100, i32 0
-  %r106 = load i32, i32* %r105, align 4
+if_5_10_end:                                      ; preds = %if_5_10_false, %0
+  %r106 = getelementptr i32, i32* %r100, i32 0
+  %r105 = load i32, i32* %r106, align 4
   %r107 = load i32, i32* %r102, align 4
   %r108 = sub i32 %r107, 2
-  %r109 = icmp sgt i32 %r106, %r108
+  %r109 = icmp sgt i32 %r105, %r108
   br i1 %r109, label %if_5_14_true, label %if_5_14_false
 
 if_5_14_true:                                     ; preds = %if_5_10_end
   ret i32 1
 
-bb2:                                              ; No predecessors!
+1:                                                ; No predecessors!
   br label %if_5_14_end
 
 if_5_14_false:                                    ; preds = %if_5_10_end
   br label %if_5_14_end
 
-if_5_14_end:                                      ; preds = %if_5_14_false, %bb2
+if_5_14_end:                                      ; preds = %if_5_14_false, %1
   store i32 0, i32* %r111, align 4
   br label %while_5_21_cond
 
@@ -106,20 +106,20 @@ while_5_28_cond:                                  ; preds = %while_9_37_bre, %wh
 
 while_5_28_whilestms:                             ; preds = %while_5_28_cond
   %r130 = load i32, i32* %r111, align 4
-  %r131 = getelementptr i32, i32* %r100, i32 %r130
-  %r132 = load i32, i32* %r131, align 4
+  %r132 = getelementptr i32, i32* %r100, i32 %r130
+  %r131 = load i32, i32* %r132, align 4
   %r133 = load i32, i32* %r102, align 4
   %r134 = sub i32 %r133, 1
   %r135 = load i32, i32* %r111, align 4
   %r136 = sub i32 %r134, %r135
-  %r137 = icmp slt i32 %r132, %r136
+  %r137 = icmp slt i32 %r131, %r136
   br i1 %r137, label %if_9_30_true, label %if_9_30_false
 
 if_9_30_true:                                     ; preds = %while_5_28_whilestms
   %r138 = load i32, i32* %r111, align 4
-  %r139 = getelementptr i32, i32* %r100, i32 %r138
-  %r140 = load i32, i32* %r139, align 4
-  store i32 %r140, i32* %r129, align 4
+  %r140 = getelementptr i32, i32* %r100, i32 %r138
+  %r139 = load i32, i32* %r140, align 4
+  store i32 %r139, i32* %r129, align 4
   br label %if_9_30_end
 
 if_9_30_false:                                    ; preds = %while_5_28_whilestms
@@ -144,9 +144,9 @@ while_9_37_whilestms:                             ; preds = %while_9_37_cond
   %r149 = add i32 %r147, %r148
   store i32 %r149, i32* %r120, align 4
   %r150 = load i32, i32* %r120, align 4
-  %r151 = getelementptr [10 x i32], [10 x i32]* %r110, i32 0, i32 %r150
-  %r152 = load i32, i32* %r151, align 4
-  %r153 = icmp ne i32 %r152, 0
+  %r152 = getelementptr [10 x i32], [10 x i32]* %r110, i32 0, i32 %r150
+  %r151 = load i32, i32* %r152, align 4
+  %r153 = icmp ne i32 %r151, 0
   br i1 %r153, label %if_13_39_true, label %if_13_39_false
 
 if_13_39_true:                                    ; preds = %while_9_37_whilestms
@@ -171,9 +171,9 @@ while_9_37_bre:                                   ; preds = %while_9_37_cond
   br label %while_5_28_cond
 
 while_5_28_bre:                                   ; preds = %while_5_28_cond
-  %r160 = getelementptr [10 x i32], [10 x i32]* %r110, i32 0, i32 0
-  %r161 = load i32, i32* %r160, align 4
-  ret i32 %r161
+  %r161 = getelementptr [10 x i32], [10 x i32]* %r110, i32 0, i32 0
+  %r160 = load i32, i32* %r161, align 4
+  ret i32 %r160
 }
 
 define i32 @main() {

@@ -536,25 +536,24 @@ std::vector<Func_local *> ast2llvmProg_second(aA_program p)
 
 Func_local *ast2llvmFunc(aA_fnDef f)
 {
-    string name = *f->fnDecl->id;
-    FuncType ret = funcReturnMap[name];
     emit_irs.clear();
-    label(Temp_newlabel_named(name));
     localVarMap.clear();
+    string name = *f->fnDecl->id;
+    label(Temp_newlabel_named(name));
+
     vector<Temp_temp *> args;
     for (auto &decl : f->fnDecl->paramDecl->varDecls)
     {
-        switch (decl->kind)
+        if (decl->kind == A_varDeclType::A_varDeclScalarKind)
         {
-        case A_varDeclType::A_varDeclScalarKind:
-        {
+
             if (decl->u.declScalar->type->type == A_dataType::A_nativeTypeKind)
             {
                 Temp_temp *arg = Temp_newtemp_int();
                 args.push_back(arg);
                 Temp_temp *temp_ptr = Temp_newtemp_int_ptr(0);
                 AS_operand *arg_ptr = AS_Operand_Temp(temp_ptr);
-                alloc(arg_ptr);
+                emit_irs.push_back(L_Alloca(arg_ptr));
                 store(AS_Operand_Temp(arg), arg_ptr);
                 localVarMap.emplace(*decl->u.declScalar->id, temp_ptr);
             }
@@ -564,9 +563,8 @@ Func_local *ast2llvmFunc(aA_fnDef f)
                 args.push_back(temp);
                 localVarMap.emplace(*decl->u.declScalar->id, temp);
             }
-            break;
         }
-        case A_varDeclType::A_varDeclArrayKind: // 数组
+        else if (decl->kind == A_varDeclType::A_varDeclArrayKind) // 数组
         {
             if (decl->u.declArray->type->type == A_dataType::A_nativeTypeKind)
             {
@@ -582,22 +580,28 @@ Func_local *ast2llvmFunc(aA_fnDef f)
                 args.push_back(temp);
                 localVarMap.emplace(*decl->u.declArray->id, temp);
             }
-            break;
         }
-        default:
-        {
+        else
             assert(0);
-            break;
-        }
-        }
     }
-    // 语句
+    // 处理函数体的语句块
     for (auto &stmt : f->stmts)
     {
         ast2llvmBlock(stmt, nullptr, nullptr);
         if (stmt->kind == A_codeBlockStmtType::A_returnStmtKind)
             break;
     }
+
+    // 如果最后没有返回语句，函数会依据返回类型生成默认返回。
+    if (emit_irs.back()->type != L_StmKind::T_RETURN)
+    {
+        if (funcReturnMap[*f->fnDecl->id].type == ReturnType::VOID_TYPE)
+            emit_irs.push_back(L_Ret(nullptr));
+        else
+            emit_irs.push_back(L_Ret(AS_Operand_Const(0)));
+    }
+
+    FuncType ret = funcReturnMap[name];
 
     return new Func_local(name, ret, args, emit_irs);
 }
@@ -651,10 +655,7 @@ void ast2llvmBlock(aA_codeBlockStmt b, Temp_label *con_label, Temp_label *bre_la
         break;
     }
     default:
-    {
         assert(0);
-        break;
-    }
     }
 }
 
@@ -665,17 +666,27 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
         if (s->u.varDecl->kind == A_varDeclScalarKind)
         {
             aA_varDeclScalar varDeclScalar = s->u.varDecl->u.declScalar;
-            if (varDeclScalar->type->type == A_structTypeKind)
+            if (varDeclScalar->type == nullptr)
+            {
+                Temp_temp *temp = Temp_newtemp_int_ptr(0);
+                localVarMap.emplace(*varDeclScalar->id, temp);
+                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
+            }
+            else if (varDeclScalar->type->type == A_structTypeKind)
             {
                 Temp_temp *temp = Temp_newtemp_struct_ptr(0, *varDeclScalar->type->u.structType);
                 localVarMap.emplace(*varDeclScalar->id, temp);
-                alloc(AS_Operand_Temp(temp));
+                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
             }
             else if (varDeclScalar->type->type == A_dataType::A_nativeTypeKind)
             {
                 Temp_temp *temp = Temp_newtemp_int_ptr(0);
+                // if (localVarMap.find(id) != localVarMap.end())
+                //         localVarMap[id] = var;
+                //     else
                 localVarMap.emplace(*varDeclScalar->id, temp);
-                alloc(AS_Operand_Temp(temp));
+                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
+                ;
             }
             else
                 assert(0);
@@ -687,13 +698,13 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
             {
                 Temp_temp *temp = Temp_newtemp_struct_ptr(varDeclArray->len, *varDeclArray->type->u.structType);
                 localVarMap.emplace(*varDeclArray->id, temp);
-                alloc(AS_Operand_Temp(temp));
+                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
             }
             else if (varDeclArray->type->type == A_nativeTypeKind)
             {
                 Temp_temp *temp = Temp_newtemp_int_ptr(varDeclArray->len);
                 localVarMap.emplace(*varDeclArray->id, temp);
-                alloc(AS_Operand_Temp(temp));
+                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
             }
             else
                 assert(0);
@@ -706,14 +717,21 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
         if (s->u.varDef->kind == A_varDefScalarKind)
         {
             aA_varDefScalar varDefScalar = s->u.varDef->u.defScalar;
+            aA_rightVal val = varDefScalar->val;
+            Temp_temp *temp;
+            AS_operand *dst;
+
             if (varDefScalar->type->type == A_nativeTypeKind)
             {
-                Temp_temp *temp = Temp_newtemp_int_ptr(0);
-                AS_operand *dst = AS_Operand_Temp(temp);
+                temp = Temp_newtemp_int_ptr(0);
+                dst = AS_Operand_Temp(temp);
                 localVarMap.emplace(*varDefScalar->id, temp);
-                alloc(dst);
-                AS_operand *right = ast2llvmRightVal(varDefScalar->val);
-                loadAndStore(dst, right);
+                emit_irs.push_back(L_Alloca(dst));
+                emit_irs.push_back(L_Store(ast2llvmRightVal(val), dst));
+            }
+            else if (varDefScalar->type->type == A_structTypeKind)
+            {
+                // 只能一个一个个赋值
             }
             else
                 assert(0);
@@ -726,17 +744,18 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
                 Temp_temp *temp = Temp_newtemp_int_ptr(varDefArray->len);
                 AS_operand *dst = AS_Operand_Temp(temp);
                 localVarMap.emplace(*varDefArray->id, temp);
-                alloc(dst);
+                emit_irs.push_back(L_Alloca(dst));
                 AS_operand *base_ptr = dst;
                 int i = 0;
                 for (; i < varDefArray->len; i++)
                 {
                     AS_operand *new_ptr = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
-                    AS_operand *index = AS_Operand_Const(i);
-                    gep(new_ptr, base_ptr, index);
-                    AS_operand *val = ast2llvmRightVal(varDefArray->vals[i]);
-                    loadAndStore(new_ptr, val);
+                    gep(new_ptr, base_ptr, AS_Operand_Const(i));
+                    emit_irs.push_back(L_Store(ast2llvmRightVal(varDefArray->vals[i]), new_ptr));
                 }
+            }
+            else if (varDefArray->type->type == A_dataType::A_structTypeKind)
+            {
             }
             else
                 assert(0);
@@ -750,7 +769,7 @@ void ast2llvmStmtassign(aA_assignStmt s)
 {
     AS_operand *left = ast2llvmLeftVal(s->leftVal);
     AS_operand *right = ast2llvmRightVal(s->rightVal);
-    loadAndStore(left, right);
+    emit_irs.push_back(L_Store(right, left));
 }
 
 void ast2llvmStmtcall(aA_callStmt s)
@@ -761,52 +780,32 @@ void ast2llvmStmtcall(aA_callStmt s)
 AS_operand *ast2llvmfnCall(aA_fnCall callExpr)
 {
     vector<AS_operand *> args;
-    string name = *callExpr->fn;
-    for (int i = 0; i < callExpr->vals.size(); i++)
+    for (auto val : callExpr->vals)
     {
-
-        AS_operand *temp = ast2llvmRightVal(callExpr->vals[i]);
-
-        if (temp->kind == OperandKind::TEMP && (temp->u.TEMP->len > 0 || temp->u.TEMP->len == -1) ||
-            temp->kind == OperandKind::NAME && (temp->u.NAME->len > 0 || temp->u.TEMP->len == -1))
-        {
-            if (temp->u.TEMP->type == TempType::INT_PTR ||
-                temp->u.NAME->type == TempType::INT_PTR)
-            {
-                AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int_ptr(-1));
-                AS_operand *index = AS_Operand_Const(0);
-                gep(dst, temp, index);
-                args.push_back(dst);
-            }
-            else if (temp->u.TEMP->type == TempType::STRUCT_PTR ||
-                     temp->u.NAME->type == TempType::STRUCT_PTR)
-            {
-                AS_operand *dst = AS_Operand_Temp(Temp_newtemp_struct_ptr(-1, move(temp->u.TEMP->structname)));
-                AS_operand *index = AS_Operand_Const(0);
-                gep(dst, temp, index);
-                args.push_back(dst);
-            }
-        }
-        else
-        {
-            AS_operand *left = Ptr2Val(temp);
-            args.push_back(left);
-        }
+        args.push_back(ast2llvmRightVal(val));
     }
 
-    AS_operand *res = nullptr;
-    FuncType funcType = funcReturnMap[name];
-    if (funcType.type == ReturnType::VOID_TYPE)
-    {
-        emit_irs.push_back(L_Voidcall(name, args));
-    }
-    else if (funcType.type == ReturnType::INT_TYPE)
+    AS_operand *res;
+
+    if (funcReturnMap.find(*callExpr->fn) != funcReturnMap.end())
     {
         res = AS_Operand_Temp(Temp_newtemp_int());
-        emit_irs.push_back(L_Call(name, res, args));
+        string name = *callExpr->fn;
+        FuncType funcType = funcReturnMap[name];
+        if (funcType.type == ReturnType::VOID_TYPE)
+        {
+            emit_irs.push_back(L_Voidcall(name, args));
+        }
+        else if (funcType.type == ReturnType::INT_TYPE)
+        {
+            emit_irs.push_back(L_Call(name, res, args));
+        }
+        else
+            assert(0);
     }
     else
         assert(0);
+
     return res;
 }
 
@@ -820,10 +819,8 @@ void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label)
 
     // 翻译if代码块
     label(true_label);
-    std::vector<string> ifVector;
     for (int i = 0; i < s->ifStmts.size(); i++)
     {
-        // ast2llvmBlock(s->ifStmts[i], con_label, bre_label, ifVector);
         ast2llvmBlock(s->ifStmts[i], con_label, bre_label);
         if (s->ifStmts[i]->kind == A_codeBlockStmtType::A_returnStmtKind)
             break;
@@ -833,13 +830,9 @@ void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label)
     //     localVarMap.erase(ifVector[i]);
     // ifVector.clear();
     jump(end_label);
-
-    // 翻译else代码块
     label(false_label);
-    // std::vector<string> elseVector;
     for (int i = 0; i < s->elseStmts.size(); i++)
     {
-        // ast2llvmBlock(s->elseStmts[i], con_label, bre_label, elseVector);
         ast2llvmBlock(s->elseStmts[i], con_label, bre_label);
         if (s->elseStmts[i]->kind == A_codeBlockStmtType::A_returnStmtKind)
             break;
@@ -849,8 +842,6 @@ void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label)
     //     localVarMap.erase(elseVector[i]);
     // elseVector.clear();
     jump(end_label);
-
-    // end标签
     label(end_label);
 }
 
@@ -860,17 +851,13 @@ void ast2llvmStmtwhile(aA_whileStmt s)
     Temp_label *new_con_label = Temp_newlabel_named(name + "_cond");
     Temp_label *new_bre_label = Temp_newlabel_named(name + "_bre");
     Temp_label *true_label = Temp_newlabel_named(name + "_whilestms");
-
     jump(new_con_label);
-
     label(new_con_label);
     ast2llvmBoolUnit(s->boolUnit, true_label, new_bre_label);
 
     label(true_label);
-    // std::vector<string> whileVector;
     for (int i = 0; i < s->whileStmts.size(); i++)
     {
-        // ast2llvmBlock(s->whileStmts[i], new_con_label, new_bre_label, whileVector);
         ast2llvmBlock(s->whileStmts[i], new_con_label, new_bre_label);
         if (s->whileStmts[i]->kind == A_codeBlockStmtType::A_returnStmtKind)
             break;
@@ -878,145 +865,261 @@ void ast2llvmStmtwhile(aA_whileStmt s)
     // for(int i = 0;i<whileVector.size();i++)
     //     localVarMap.erase(whileVector[i]);
     jump(new_con_label);
-
     label(new_bre_label);
 }
 
 void ast2llvmStmtreturn(aA_returnStmt s)
 {
-    if (s->retVal == nullptr)
-    {
-        retVoid();
-    }
-    else
-    {
-        retVal(Ptr2Val(ast2llvmRightVal(s->retVal)));
-    }
+    emit_irs.push_back(L_Ret(ast2llvmRightVal(s->retVal)));
 }
 
-AS_operand *ast2llvmArray(aA_arrayExpr arrExpr)
+AS_operand *ast2llvmArray_1(aA_arrayExpr arrExpr)
 {
     AS_operand *base_ptr = ast2llvmLeftVal(arrExpr->arr);
-    AS_operand *index = Ptr2Val(ast2llvmIndexExpr(arrExpr->idx));
-    AS_operand *new_ptr = nullptr;
-
-    // 获取new_ptr的类型
-    if (base_ptr->kind == OperandKind::NAME)
-    {
-        Name_name *name = base_ptr->u.NAME;
-        if (name->type == TempType::INT_PTR)
-        {
-            new_ptr = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
-        }
-        else
-        {
-            new_ptr = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, name->structname));
-        }
-    }
-    else if (base_ptr->kind == OperandKind::TEMP)
-    {
-        Temp_temp *temp = base_ptr->u.TEMP;
-        if (temp->type == TempType::INT_PTR)
-        {
-            new_ptr = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
-        }
-        else if (temp->type == TempType::STRUCT_PTR)
-        {
-            new_ptr = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, temp->structname));
-        }
-        else
-        {
-            assert(0);
-        }
-    }
-    else
-    {
-        assert(0);
-    }
-
-    gep(new_ptr, base_ptr, index);
-    return new_ptr;
+    AS_operand *index = ast2llvmIndexExpr(arrExpr->idx);
+    AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+    AS_operand *mid = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+    gep(mid, base_ptr, index);
+    load(res, mid);
+    return res;
 }
 
-AS_operand *ast2llvmMember(aA_memberExpr memberExpr)
+AS_operand *ast2llvmArray_2(aA_arrayExpr arrExpr)
+{
+    AS_operand *arr = ast2llvmLeftVal(arrExpr->arr);
+    AS_operand *index = ast2llvmIndexExpr(arrExpr->idx);
+    AS_operand *res;
+    if (arr->kind == OperandKind::NAME)
+    {
+        if (arr->u.NAME->type == TempType::INT_PTR)
+        {
+            res = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+        }
+        else if (arr->u.NAME->type == TempType::STRUCT_PTR)
+        {
+            res = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, arr->u.NAME->structname));
+        }
+        else
+            assert(0);
+    }
+    else if (arr->kind == OperandKind::TEMP)
+    {
+        if (arr->u.TEMP->type == TempType::INT_PTR)
+        {
+            res = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+        }
+        else if (arr->u.TEMP->type == TempType::STRUCT_PTR)
+        {
+            res = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, arr->u.TEMP->structname));
+        }
+        else
+            assert(0);
+    }
+    else
+        assert(0);
+    gep(res, arr, index);
+    return res;
+}
+
+AS_operand *ast2llvmMember_1(aA_memberExpr memberExpr)
 {
     // 1. 确定base_ptr
     AS_operand *base_ptr = ast2llvmLeftVal(memberExpr->structId);
-
-    // 2. 确定index
-    string structName = std::string();
-    // 确定结构体名称
+    AS_operand *mid = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+    AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
     if (base_ptr->kind == OperandKind::TEMP)
     {
-        Temp_temp *temp = base_ptr->u.TEMP;
-        structName = temp->structname;
+        string structName = base_ptr->u.TEMP->structname;
+        // 确定位置
+        StructInfo structInfo = structInfoMap[structName];
+        MemberInfo memberInfo = structInfo.memberinfos[*memberExpr->memberId];
+        AS_operand *index = AS_Operand_Const(memberInfo.offset);
+
+        gep(mid, base_ptr, index);
+        load(res, mid);
+    }
+    else if (base_ptr->kind == OperandKind::NAME)
+    {
+        string structName = base_ptr->u.NAME->structname;
+
+        StructInfo structInfo = structInfoMap[structName];
+        MemberInfo memberInfo = structInfo.memberinfos[*memberExpr->memberId];
+        AS_operand *index = AS_Operand_Const(memberInfo.offset);
+
+        gep(mid, base_ptr, index);
+        load(res, mid);
     }
     else
-    {
-        Name_name *name = base_ptr->u.NAME;
-        structName = name->structname;
-    }
-
-    StructInfo structInfo = structInfoMap[structName];
-    MemberInfo memberInfo = structInfo.memberinfos[*memberExpr->memberId];
-    AS_operand *index = AS_Operand_Const(memberInfo.offset);
-
-    // 3. 确定new_ptr
-    AS_operand *new_ptr = nullptr;
-    switch (memberInfo.def.kind)
-    {
-    case TempType::INT_TEMP:
-    {
-        //??? int
-        new_ptr = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
-        break;
-    }
-    case TempType::INT_PTR:
-    {
-        new_ptr = AS_Operand_Temp(Temp_newtemp_int_ptr(memberInfo.def.len));
-        break;
-    }
-    case TempType::STRUCT_TEMP:
-    {
-        new_ptr = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, memberInfo.def.structname));
-        break;
-    }
-    case TempType::STRUCT_PTR:
-    {
-        new_ptr = AS_Operand_Temp(Temp_newtemp_struct_ptr(memberInfo.def.len, memberInfo.def.structname));
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
-
-    gep(new_ptr, base_ptr, index);
-    return new_ptr;
+        assert(0);
+    return res;
 }
 
-AS_operand *ast2llvmId(string id)
+AS_operand *ast2llvmMember_2(aA_memberExpr memberExpr)
+{
+    AS_operand *base = ast2llvmLeftVal(memberExpr->structId);
+    AS_operand *res;
+    AS_operand *index;
+
+    // 如果基地址是全局变量（名字操作数）
+    if (base->kind == OperandKind::NAME)
+    {
+        // 获取成员的偏移量和定义
+        int offset = structInfoMap[base->u.NAME->structname].memberinfos[*memberExpr->memberId].offset;
+        index = AS_Operand_Const(offset);
+        TempDef def = structInfoMap[base->u.NAME->structname].memberinfos[*memberExpr->memberId].def;
+
+        // 根据成员类型分配合适的寄存器
+        if (base->u.NAME->type == TempType::STRUCT_TEMP)
+        {
+            if (def.kind == TempType::INT_TEMP)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+            }
+            else if (def.kind == TempType::INT_PTR)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_int_ptr(def.len));
+            }
+            else if (def.kind == TempType::STRUCT_TEMP)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, def.structname));
+            }
+            else if (def.kind == TempType::STRUCT_PTR)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_struct_ptr(def.len, def.structname));
+            }
+            else
+                assert(0);
+        }
+        else
+            assert(0);
+    }
+    // 如果基地址是寄存器
+    else if (base->kind == OperandKind::TEMP)
+    {
+        int offset = structInfoMap[base->u.TEMP->structname].memberinfos[*memberExpr->memberId].offset;
+        index = AS_Operand_Const(offset);
+        TempDef def = structInfoMap[base->u.TEMP->structname].memberinfos[*memberExpr->memberId].def;
+
+        // 根据成员类型分配合适的寄存器
+        if (base->u.TEMP->type == TempType::STRUCT_PTR && base->u.TEMP->len == 0)
+        {
+            if (def.kind == TempType::INT_TEMP)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
+            }
+            else if (def.kind == TempType::INT_PTR)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_int_ptr(def.len));
+            }
+            else if (def.kind == TempType::STRUCT_TEMP)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_struct_ptr(0, def.structname));
+            }
+            else if (def.kind == TempType::STRUCT_PTR)
+            {
+                res = AS_Operand_Temp(Temp_newtemp_struct_ptr(def.len, def.structname));
+            }
+            else
+                assert(0);
+        }
+        else
+            assert(0);
+    }
+    else
+        assert(0);
+
+    // 生成GEP指令，用于访问结构体成员
+    emit_irs.push_back(L_Gep(res, base, index));
+    return res;
+}
+
+AS_operand *ast2llvmId_2(string id)
+{
+    // 如果变量是局部变量
+    if (localVarMap.find(id) != localVarMap.end())
+    {
+        // 返回局部变量对应的寄存器
+        return AS_Operand_Temp(localVarMap[id]);
+    }
+    // 如果变量是全局变量
+    else if (globalVarMap.find(id) != globalVarMap.end())
+    {
+        // 返回全局变量对应的名字操作数
+        return AS_Operand_Name(globalVarMap[id]);
+    }
+    else
+        // 如果变量未定义，则触发断言
+        assert(0);
+}
+
+AS_operand *ast2llvmId_1(string id)
 {
     if (localVarMap.find(id) != localVarMap.end())
     {
-        Temp_temp *temp = localVarMap[id];
-        return AS_Operand_Temp(localVarMap[id]);
+        AS_operand *temp = AS_Operand_Temp(localVarMap[id]);
+        if (localVarMap[id]->type == TempType::INT_PTR && localVarMap[id]->len == 0)
+        {
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+            emit_irs.push_back(L_Load(res, temp));
+            return res;
+        }
+        else if (localVarMap[id]->type == TempType::INT_PTR && localVarMap[id]->len > 0)
+        {
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int_ptr(-1));
+            AS_operand *index = AS_Operand_Const(0);
+            gep(res, temp, index);
+            return res;
+        }
+        else if(localVarMap[id]->type == TempType::STRUCT_PTR){
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_struct_ptr(-1, move(temp->u.TEMP->structname)));
+            AS_operand *index = AS_Operand_Const(0);
+            gep(res, temp, index);
+            return res;
+        }
+
+        return temp;
+    }
+    else if (globalVarMap.find(id) != globalVarMap.end()) // 如果变量是全局变量
+    {
+        AS_operand *temp = AS_Operand_Name(globalVarMap[id]);
+        if (globalVarMap[id]->type == TempType::INT_TEMP)
+        {
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+            emit_irs.push_back(L_Load(res, temp));
+            return res;
+        }
+        else if (globalVarMap[id]->type == TempType::INT_PTR && globalVarMap[id]->len >= 0)
+        {
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int_ptr(-1));
+            AS_operand *index = AS_Operand_Const(0);
+            gep(res, temp, index);
+            return res;
+        }
+        else if(globalVarMap[id]->type == TempType::STRUCT_PTR ){
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_struct_ptr(-1, move(temp->u.TEMP->structname)));
+            AS_operand *index = AS_Operand_Const(0);
+            gep(res, temp, index);
+            return res;
+        }
+
+        else
+            return temp;
     }
     else
-    {
-        return AS_Operand_Name(globalVarMap[id]);
-    }
+        assert(0);
 }
 
 AS_operand *ast2llvmRightVal(aA_rightVal r)
 {
+    // 检查右值是否为空，如果为空则直接返回nullptr
+    if (r == nullptr)
+        return nullptr;
+
     switch (r->kind)
     {
     case A_rightValType::A_arithExprValKind:
     {
         return ast2llvmArithExpr(r->u.arithExpr);
-        break;
     }
     case A_rightValType::A_boolExprValKind:
     {
@@ -1024,10 +1127,10 @@ AS_operand *ast2llvmRightVal(aA_rightVal r)
         Temp_label *true_label = Temp_newlabel_named(name + "_true");
         Temp_label *false_label = Temp_newlabel_named(name + "_false");
         Temp_label *end_label = Temp_newlabel_named(name + "_end");
-
+        // 分配一个寄存器来存储布尔表达式的值（0或1）
         AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int_ptr(0));
-        alloc(dst);
-
+        emit_irs.push_back(L_Alloca(dst));
+        // 生成布尔表达式的LLVM IR代码，并根据结果跳转到true_label或false_label
         ast2llvmBoolExpr(r->u.boolExpr, true_label, false_label);
 
         label(true_label);
@@ -1044,15 +1147,10 @@ AS_operand *ast2llvmRightVal(aA_rightVal r)
         load(res, dst);
 
         return res;
-        break;
     }
     default:
-    {
-        break;
+        assert(0);
     }
-    }
-    assert(0);
-    return nullptr;
 }
 
 AS_operand *ast2llvmLeftVal(aA_leftVal l)
@@ -1061,15 +1159,15 @@ AS_operand *ast2llvmLeftVal(aA_leftVal l)
     {
     case A_leftValType::A_arrValKind:
     {
-        return ast2llvmArray(l->u.arrExpr);
+        return ast2llvmArray_2(l->u.arrExpr);
     }
     case A_leftValType::A_memberValKind:
     {
-        return ast2llvmMember(l->u.memberExpr);
+        return ast2llvmMember_2(l->u.memberExpr);
     }
     case A_leftValType::A_varValKind:
     {
-        return ast2llvmId(*l->u.id);
+        return ast2llvmId_2(*l->u.id);
     }
     default:
     {
@@ -1085,68 +1183,59 @@ AS_operand *ast2llvmIndexExpr(aA_indexExpr index)
         return AS_Operand_Const(index->u.num);
     else if (index->kind == A_indexExprKind::A_idIndexKind)
     {
-        if ((localVarMap.find(*index->u.id)) != localVarMap.end())
+        string id = *index->u.id;
+
+        if ((localVarMap.find(id)) != localVarMap.end())
         {
-            Temp_temp *temp = localVarMap[*index->u.id];
+            Temp_temp *temp = localVarMap[id];
+
+            // 创建一个新的整数寄存器
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+            // 获取局部变量对应的寄存器
+            AS_operand *mid = AS_Operand_Temp(temp);
+
             if (temp->type == TempType::INT_PTR)
             {
-                AS_operand *ret = AS_Operand_Temp(Temp_newtemp_int());
-                emit_irs.push_back(L_Load(ret, AS_Operand_Temp(temp)));
-                return ret;
+                emit_irs.push_back(L_Load(res, mid));
+                return res;
             }
             else if (temp->type == TempType::INT_TEMP)
-            {
-                AS_operand *ret = AS_Operand_Temp(temp);
-                return ret;
-            }
+                return mid;
             else
                 assert(0);
         }
-        else if ((globalVarMap.find(*index->u.id)) != globalVarMap.end())
+        else if ((globalVarMap.find(id)) != globalVarMap.end())
         {
-            AS_operand *ope_name = AS_Operand_Name(globalVarMap[*index->u.id]);
-            AS_operand *ope_dst;
-            if (globalVarMap[*index->u.id]->type == TempType::INT_TEMP)
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+            AS_operand *ope_name = AS_Operand_Name(globalVarMap[id]);
+            if (globalVarMap[id]->type == TempType::INT_TEMP)
             {
-                ope_dst = AS_Operand_Temp(Temp_newtemp_int());
-                emit_irs.push_back(L_Load(ope_dst, ope_name));
+                emit_irs.push_back(L_Load(res, ope_name));
             }
             else
-                ope_dst = ope_name;
-            return ope_dst;
+                res = ope_name;
+            return res;
         }
         else
-        {
             assert(0);
-        }
     }
     else
-    {
         assert(0);
-    }
 }
 
 AS_operand *ast2llvmBoolExpr(aA_boolExpr b, Temp_label *true_label, Temp_label *false_label)
 {
-    switch (b->kind)
+    assert(true_label && false_label);
+    if (b->kind == A_boolExprType::A_boolBiOpExprKind)
     {
-    case A_boolExprType::A_boolBiOpExprKind:
-    {
-        // void
         ast2llvmBoolBiOpExpr(b->u.boolBiOpExpr, true_label, false_label);
-        break;
     }
-    case A_boolExprType::A_boolUnitKind:
+    else if (b->kind == A_boolExprType::A_boolUnitKind)
     {
-        // void
         ast2llvmBoolUnit(b->u.boolUnit, true_label, false_label);
-        break;
     }
-    default:
-    {
-        break;
-    }
-    }
+    else
+        assert(0);
     return nullptr;
 }
 
@@ -1163,26 +1252,23 @@ void ast2llvmBoolBiOpExpr(aA_boolBiOpExpr b, Temp_label *true_label, Temp_label 
     case A_boolBiOp::A_and:
     {
         ast2llvmBoolExpr(b->left, next_label, false_label);
-
-        label(next_label);
-        ast2llvmBoolExpr(b->right, true_label, false_label);
-
         break;
     }
     case A_boolBiOp::A_or:
     {
         ast2llvmBoolExpr(b->left, true_label, next_label);
-
-        label(next_label);
-        ast2llvmBoolExpr(b->right, true_label, false_label);
-
         break;
     }
     default:
-    {
-        break;
+        assert(0);
     }
-    }
+    label(next_label);
+    ast2llvmBoolExpr(b->right, true_label, false_label);
+}
+
+void ast2llvmBoolUOpExpr(aA_boolUOpExpr b, Temp_label *true_label, Temp_label *false_label)
+{
+    ast2llvmBoolUnit(b->cond, false_label, true_label);
 }
 
 void ast2llvmBoolUnit(aA_boolUnit b, Temp_label *true_label, Temp_label *false_label)
@@ -1196,7 +1282,7 @@ void ast2llvmBoolUnit(aA_boolUnit b, Temp_label *true_label, Temp_label *false_l
     }
     case A_boolUnitType::A_boolUOpExprKind:
     {
-        ast2llvmBoolUnit(b->u.boolUOpExpr->cond, false_label, true_label);
+        ast2llvmBoolUOpExpr(b->u.boolUOpExpr, true_label, false_label);
         break;
     }
     case A_boolUnitType::A_comOpExprKind:
@@ -1213,8 +1299,8 @@ void ast2llvmBoolUnit(aA_boolUnit b, Temp_label *true_label, Temp_label *false_l
 
 void ast2llvmComOpExpr(aA_comExpr c, Temp_label *true_label, Temp_label *false_label)
 {
-    AS_operand *left = Ptr2Val(ast2llvmExprUnit(c->left));
-    AS_operand *right = Ptr2Val(ast2llvmExprUnit(c->right));
+    AS_operand *left = ast2llvmExprUnit(c->left);
+    AS_operand *right = ast2llvmExprUnit(c->right);
     AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
 
     switch (c->op)
@@ -1259,8 +1345,8 @@ void ast2llvmComOpExpr(aA_comExpr c, Temp_label *true_label, Temp_label *false_l
 
 AS_operand *ast2llvmArithBiOpExpr(aA_arithBiOpExpr a)
 {
-    AS_operand *left = Ptr2Val(ast2llvmArithExpr(a->left));
-    AS_operand *right = Ptr2Val(ast2llvmArithExpr(a->right));
+    AS_operand *left = ast2llvmArithExpr(a->left);
+    AS_operand *right = ast2llvmArithExpr(a->right);
     AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
 
     switch (a->op)
@@ -1286,9 +1372,7 @@ AS_operand *ast2llvmArithBiOpExpr(aA_arithBiOpExpr a)
         break;
     }
     default:
-    {
-        break;
-    }
+        assert(0);
     }
     return dst;
 }
@@ -1296,34 +1380,24 @@ AS_operand *ast2llvmArithBiOpExpr(aA_arithBiOpExpr a)
 AS_operand *ast2llvmArithUExpr(aA_arithUExpr a)
 {
     AS_operand *zero = AS_Operand_Const(0);
-    AS_operand *val = Ptr2Val(ast2llvmExprUnit(a->expr));
+    AS_operand *val = ast2llvmExprUnit(a->expr);
     AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
-
     binop(L_binopKind::T_minus, zero, val, dst);
     return dst;
 }
 
 AS_operand *ast2llvmArithExpr(aA_arithExpr a)
 {
-    switch (a->kind)
-    {
-    case A_arithExprType::A_arithBiOpExprKind:
+    if (a->kind == A_arithExprType::A_arithBiOpExprKind)
     {
         return ast2llvmArithBiOpExpr(a->u.arithBiOpExpr);
-        break;
     }
-    case A_arithExprType::A_exprUnitKind:
+    else if (a->kind == A_arithExprType::A_exprUnitKind)
     {
         return ast2llvmExprUnit(a->u.exprUnit);
-        break;
     }
-    default:
-    {
-        break;
-    }
-    }
-    assert(0);
-    return nullptr;
+    else
+        assert(0);
 }
 
 AS_operand *ast2llvmExprUnit(aA_exprUnit e)
@@ -1336,7 +1410,7 @@ AS_operand *ast2llvmExprUnit(aA_exprUnit e)
     }
     case A_idExprKind:
     {
-        return ast2llvmId(*e->u.id);
+        return ast2llvmId_1(*e->u.id);
     }
     case A_arithExprKind:
     {
@@ -1348,89 +1422,37 @@ AS_operand *ast2llvmExprUnit(aA_exprUnit e)
     }
     case A_arrayExprKind:
     {
-        return ast2llvmArray(e->u.arrayExpr);
+        return ast2llvmArray_1(e->u.arrayExpr);
     }
     case A_memberExprKind:
     {
-        return ast2llvmMember(e->u.memberExpr);
+        return ast2llvmMember_1(e->u.memberExpr);
     }
     case A_arithUExprKind:
     {
         return ast2llvmArithUExpr(e->u.arithUExpr);
     }
     default:
-    {
-        break;
+        assert(0);
     }
-    }
-    assert(0);
-    return nullptr;
 }
 
 LLVMIR::L_func *ast2llvmFuncBlock(Func_local *f)
 {
     list<L_block *> blocks;
-    // 存储基本块中的指令
-    std::list<L_stm *> instrs;
-    // 存储基本块的后继标签
-    // std::unordered_set<Temp_label *> succs;
-    // // 创建初始基本块
-    // L_block *lblock = new L_block(Temp_newlabel(), succs, instrs);
-    // lblock->instrs.push_back(L_Label(lblock->label));
-
-    // Temp_label *label;
-    // // 标志是否已有后继
-    // bool hasSuccs = true;
-    // // 标志是否已有返回语句
-    // bool notRet = true;
-
-    for (auto x : f->irs)
+    list<L_stm *> blockIr;
+    for (auto ir : f->irs)
     {
-        if (x->type == L_StmKind::T_LABEL)
+        if (ir->type == L_StmKind::T_LABEL)
         {
-            // 标签
-            if (!instrs.empty())
-            {
-                // 遇到一个标签，当前块指令未完，添加到标签的jump指令并保存当前块
-                instrs.push_back(L_Jump(x->u.LABEL->label));
-                blocks.push_back(L_Block(instrs));
-                instrs.clear();
-            }
-            instrs.push_back(x);
+            if (blockIr.size() > 0)
+                blocks.push_back(L_Block(blockIr));
+            blockIr.clear();
         }
-        else if (x->type == L_StmKind::T_CJUMP || x->type == L_StmKind::T_JUMP || x->type == L_StmKind::T_RETURN)
-        {
-            // 遇到jump指令
-            instrs.push_back(x);
-            if (instrs.front()->type != L_StmKind::T_LABEL)
-            {
-                instrs.push_front(L_Label(Temp_newlabel()));
-            }
-            blocks.push_back(L_Block(instrs));
-            instrs.clear();
-        }
-        else
-        {
-            instrs.push_back(x);
-        }
-
-        if (x == f->irs.back())
-        {
-            if (instrs.size() != 0)
-            {
-                if (instrs.front()->type != L_StmKind::T_LABEL)
-                {
-                    instrs.push_front(L_Label(Temp_newlabel()));
-                }
-                if (f->ret.type == ReturnType::VOID_TYPE)
-                    instrs.push_back(L_Ret(nullptr));
-                else
-                    instrs.push_back(L_Ret(AS_Operand_Const(0)));
-                blocks.push_back(L_Block(instrs));
-                instrs.clear();
-            }
-        }
+        blockIr.push_back(ir);
     }
+    if (blockIr.size() > 0)
+        blocks.push_back(L_Block(blockIr));
     return new L_func(f->name, f->ret, f->args, blocks);
 }
 
@@ -1452,50 +1474,6 @@ void ast2llvm_moveAlloca(LLVMIR::L_func *f)
             }
         }
     }
-}
-
-/**
- * @brief alloc语句
- * @brief %dst = alloca <ty>
- * @param AS_operand* 操作数，指针寄存器
- */
-void alloc(AS_operand *res)
-{
-    // The  alloca  instruction allocates memory on the stack frame of the currently executing function, to be automatically released when this function returns to its caller
-    emit_irs.push_back(L_Alloca(res));
-}
-
-/**
- * @brief 赋值语句
- * @brief store i32 %src, i32* %ptr
- * @param AS_operand* 操作数，左值
- */
-void loadAndStore(AS_operand *dst, AS_operand *src)
-{
-    // 把指针寄存器转为值寄存器
-    AS_operand *src_val = Ptr2Val(src);
-    // AS_operand *dst_ptr = Val2Ptr(dst);
-
-    emit_irs.push_back(L_Store(src_val, dst));
-}
-
-/**
- * @brief ret语句
- * @brief ret void
- *
- */
-void retVoid()
-{
-    emit_irs.push_back(L_Ret(nullptr));
-}
-
-/**
- * @brief ret i32 %ret
- * @param ret
- */
-void retVal(AS_operand *ret)
-{
-    emit_irs.push_back(L_Ret(ret));
 }
 
 /**
@@ -1572,60 +1550,4 @@ void cjump(AS_operand *con, Temp_label *true_label, Temp_label *false_label)
 void binop(L_binopKind kind, AS_operand *left, AS_operand *right, AS_operand *dst)
 {
     emit_irs.push_back(L_Binop(kind, left, right, dst));
-}
-
-/**
- * @brief 加载语句
- * @param AS_operand* 操作数，指针寄存器
- * @return AS_operand* 操作数，值寄存器
- */
-AS_operand *Ptr2Val(AS_operand *left)
-{
-    switch (left->kind)
-    {
-    case OperandKind::TEMP:
-    {
-        switch (left->u.TEMP->type)
-        {
-        case TempType::INT_PTR:
-        {
-            AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
-            emit_irs.push_back(L_Load(dst, left));
-            return dst;
-        }
-        default:
-        {
-            return left;
-        }
-        }
-        break;
-    }
-    case OperandKind::NAME:
-    {
-        switch (left->u.NAME->type)
-        {
-        case TempType::INT_TEMP:
-        case TempType::INT_PTR:
-        {
-            AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
-            emit_irs.push_back(L_Load(dst, left));
-            return dst;
-        }
-        default:
-        {
-            return left;
-        }
-        }
-        break;
-    }
-    case OperandKind::ICONST:
-    {
-        return left;
-    }
-    default:
-    {
-        assert(0);
-        break;
-    }
-    }
 }

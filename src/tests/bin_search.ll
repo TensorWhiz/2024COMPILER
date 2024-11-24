@@ -52,10 +52,10 @@ while_5_16_bre:
 
 while_5_31_cond:
   %r123 = load i32, i32* %r114
-  %r124 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r123
-  %r125 = load i32, i32* %r124
+  %r125 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r123
+  %r124 = load i32, i32* %r125
   %r126 = load i32, i32* %r111
-  %r127 = icmp ne i32 %r125, %r126
+  %r127 = icmp ne i32 %r124, %r126
   br i1 %r127, label %bb26_31_next, label %while_5_31_bre
 
 bb26_31_next:
@@ -72,9 +72,9 @@ while_5_31_whilestms:
   store i32 %r134, i32* %r114
   %r135 = load i32, i32* %r111
   %r136 = load i32, i32* %r114
-  %r137 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r136
-  %r138 = load i32, i32* %r137
-  %r139 = icmp slt i32 %r135, %r138
+  %r138 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r136
+  %r137 = load i32, i32* %r138
+  %r139 = icmp slt i32 %r135, %r137
   br i1 %r139, label %if_9_34_true, label %if_9_34_false
 
 if_9_34_true:
@@ -95,9 +95,9 @@ if_9_34_end:
 while_5_31_bre:
   %r144 = load i32, i32* %r111
   %r145 = load i32, i32* %r114
-  %r146 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r145
-  %r147 = load i32, i32* %r146
-  %r148 = icmp eq i32 %r144, %r147
+  %r147 = getelementptr [10 x i32 ], [10 x i32 ]* %r102, i32 0, i32 %r145
+  %r146 = load i32, i32* %r147
+  %r148 = icmp eq i32 %r144, %r146
   br i1 %r148, label %if_5_44_true, label %if_5_44_false
 
 if_5_44_true:
@@ -107,14 +107,14 @@ if_5_44_true:
 
 if_5_44_false:
   store i32 0, i32* %r111
-  %r150 = load i32, i32* %r111
-  call void @putint(i32 %r150)
+  %r151 = load i32, i32* %r111
+  call void @putint(i32 %r151)
   br label %if_5_44_end
 
 if_5_44_end:
   store i32 10, i32* %r111
-  %r151 = load i32, i32* %r111
-  call void @putch(i32 %r151)
+  %r153 = load i32, i32* %r111
+  call void @putch(i32 %r153)
   ret i32 0
 }
 

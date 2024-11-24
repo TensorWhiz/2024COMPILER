@@ -18,29 +18,29 @@ foo:
 define i32 @main( ) {
 main:
   call void @_sysy_starttime(i32 9)
-  %r103 = alloca i32
-  store i32 1, i32* %r103
-  %r104 = call i32 @foo(i32 2)
-  %r105 = icmp sgt i32 %r104, 0
-  br i1 %r105, label %if_5_19_true, label %bb24_19_next
+  %r104 = alloca i32
+  store i32 1, i32* %r104
+  %r105 = call i32 @foo(i32 2)
+  %r106 = icmp sgt i32 %r105, 0
+  br i1 %r106, label %if_5_19_true, label %bb24_19_next
 
 bb24_19_next:
-  %r106 = call i32 @foo(i32 3)
-  %r107 = icmp sgt i32 %r106, 0
-  br i1 %r107, label %if_5_19_true, label %if_5_19_false
+  %r107 = call i32 @foo(i32 3)
+  %r108 = icmp sgt i32 %r107, 0
+  br i1 %r108, label %if_5_19_true, label %if_5_19_false
 
 if_5_19_true:
-  store i32 2, i32* %r103
+  store i32 2, i32* %r104
   br label %if_5_19_end
 
 if_5_19_false:
   br label %if_5_19_end
 
 if_5_19_end:
-  %r108 = load i32, i32* @a
-  call void @putint(i32 %r108)
-  %r109 = load i32, i32* %r103
+  %r109 = load i32, i32* @a
   call void @putint(i32 %r109)
+  %r111 = load i32, i32* %r104
+  call void @putint(i32 %r111)
   call void @_sysy_stoptime(i32 17)
   ret i32 0
 }

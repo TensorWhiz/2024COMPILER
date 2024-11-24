@@ -53,13 +53,13 @@ bb20_10_next:                                     ; preds = %uniquePaths
 if_5_10_true:                                     ; preds = %bb20_10_next, %uniquePaths
   ret i32 1
 
-bb1:                                              ; No predecessors!
+0:                                                ; No predecessors!
   br label %if_5_10_end
 
 if_5_10_false:                                    ; preds = %bb20_10_next
   br label %if_5_10_end
 
-if_5_10_end:                                      ; preds = %if_5_10_false, %bb1
+if_5_10_end:                                      ; preds = %if_5_10_false, %0
   store i32 0, i32* %r109, align 4
   br label %while_5_22_cond
 
@@ -154,12 +154,12 @@ while_9_36_whilestms:                             ; preds = %while_9_36_cond
   %r162 = load i32, i32* %r111, align 4
   %r163 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 %r162
   %r164 = load i32, i32* %r112, align 4
-  %r165 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 %r164
-  %r166 = load i32, i32* %r165, align 4
+  %r166 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 %r164
+  %r165 = load i32, i32* %r166, align 4
   %r167 = load i32, i32* %r113, align 4
-  %r168 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 %r167
-  %r169 = load i32, i32* %r168, align 4
-  %r170 = add i32 %r166, %r169
+  %r169 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 %r167
+  %r168 = load i32, i32* %r169, align 4
+  %r170 = add i32 %r165, %r168
   store i32 %r170, i32* %r163, align 4
   %r171 = load i32, i32* %r110, align 4
   %r172 = sub i32 %r171, 1
@@ -173,9 +173,9 @@ while_9_36_bre:                                   ; preds = %while_9_36_cond
   br label %while_5_34_cond
 
 while_5_34_bre:                                   ; preds = %while_5_34_cond
-  %r175 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 0
-  %r176 = load i32, i32* %r175, align 4
-  ret i32 %r176
+  %r176 = getelementptr [9 x i32], [9 x i32]* %r108, i32 0, i32 0
+  %r175 = load i32, i32* %r176, align 4
+  ret i32 %r175
 }
 
 define i32 @main() {

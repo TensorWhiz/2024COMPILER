@@ -91,10 +91,10 @@ bb21_36_next:                                     ; preds = %while_5_36_cond
 
 while_5_36_whilestms:                             ; preds = %bb21_36_next
   %r129 = load i32, i32* %r100, align 4
-  %r130 = getelementptr [10 x i32], [10 x i32]* %r102, i32 0, i32 %r129
-  %r131 = load i32, i32* %r130, align 4
+  %r131 = getelementptr [10 x i32], [10 x i32]* %r102, i32 0, i32 %r129
+  %r130 = load i32, i32* %r131, align 4
   %r132 = load i32, i32* %r111, align 4
-  %r133 = icmp eq i32 %r131, %r132
+  %r133 = icmp eq i32 %r130, %r132
   br i1 %r133, label %if_9_38_true, label %if_9_38_false
 
 if_9_38_true:                                     ; preds = %while_5_36_whilestms
@@ -124,14 +124,14 @@ if_5_47_true:                                     ; preds = %while_5_36_bre
 
 if_5_47_false:                                    ; preds = %while_5_36_bre
   store i32 0, i32* %r111, align 4
-  %r140 = load i32, i32* %r111, align 4
-  call void @putint(i32 %r140)
+  %r141 = load i32, i32* %r111, align 4
+  call void @putint(i32 %r141)
   br label %if_5_47_end
 
 if_5_47_end:                                      ; preds = %if_5_47_false, %if_5_47_true
   store i32 10, i32* %r111, align 4
-  %r141 = load i32, i32* %r111, align 4
-  call void @putch(i32 %r141)
+  %r143 = load i32, i32* %r111, align 4
+  call void @putch(i32 %r143)
   ret i32 0
 }
 

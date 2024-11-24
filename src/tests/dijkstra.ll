@@ -37,9 +37,9 @@ while_5_26_whilestms:
   %r106 = getelementptr [16 x %array2D ], [16 x %array2D ]* @e, i32 0, i32 1
   %r107 = getelementptr %array2D, %array2D* %r106, i32 0, i32 0
   %r108 = load i32, i32* %r100
-  %r109 = getelementptr [16 x i32 ], [16 x i32 ]* %r107, i32 0, i32 %r108
-  %r110 = load i32, i32* %r109
-  store i32 %r110, i32* %r105
+  %r110 = getelementptr [16 x i32 ], [16 x i32 ]* %r107, i32 0, i32 %r108
+  %r109 = load i32, i32* %r110
+  store i32 %r109, i32* %r105
   %r111 = load i32, i32* %r100
   %r112 = getelementptr [16 x i32 ], [16 x i32 ]* @book, i32 0, i32 %r111
   store i32 0, i32* %r112
@@ -77,23 +77,23 @@ while_9_38_cond:
 while_9_38_whilestms:
   %r127 = load i32, i32* %r120
   %r128 = load i32, i32* %r123
-  %r129 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r128
-  %r130 = load i32, i32* %r129
-  %r131 = icmp sgt i32 %r127, %r130
+  %r130 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r128
+  %r129 = load i32, i32* %r130
+  %r131 = icmp sgt i32 %r127, %r129
   br i1 %r131, label %bb39_39_next, label %if_13_39_false
 
 bb39_39_next:
   %r132 = load i32, i32* %r123
-  %r133 = getelementptr [16 x i32 ], [16 x i32 ]* @book, i32 0, i32 %r132
-  %r134 = load i32, i32* %r133
-  %r135 = icmp eq i32 %r134, 0
+  %r134 = getelementptr [16 x i32 ], [16 x i32 ]* @book, i32 0, i32 %r132
+  %r133 = load i32, i32* %r134
+  %r135 = icmp eq i32 %r133, 0
   br i1 %r135, label %if_13_39_true, label %if_13_39_false
 
 if_13_39_true:
   %r136 = load i32, i32* %r123
-  %r137 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r136
-  %r138 = load i32, i32* %r137
-  store i32 %r138, i32* %r120
+  %r138 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r136
+  %r137 = load i32, i32* %r138
+  store i32 %r137, i32* %r120
   %r139 = load i32, i32* %r123
   store i32 %r139, i32* %r122
   br label %if_13_39_end
@@ -125,42 +125,42 @@ while_9_47_whilestms:
   %r149 = getelementptr [16 x %array2D ], [16 x %array2D ]* @e, i32 0, i32 %r148
   %r150 = getelementptr %array2D, %array2D* %r149, i32 0, i32 0
   %r151 = load i32, i32* %r144
-  %r152 = getelementptr [16 x i32 ], [16 x i32 ]* %r150, i32 0, i32 %r151
-  %r153 = load i32, i32* %r152
+  %r153 = getelementptr [16 x i32 ], [16 x i32 ]* %r150, i32 0, i32 %r151
+  %r152 = load i32, i32* %r153
   %r154 = load i32, i32* @INF
-  %r155 = icmp slt i32 %r153, %r154
+  %r155 = icmp slt i32 %r152, %r154
   br i1 %r155, label %if_13_48_true, label %if_13_48_false
 
 if_13_48_true:
   %r156 = load i32, i32* %r144
-  %r157 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r156
-  %r158 = load i32, i32* %r157
+  %r158 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r156
+  %r157 = load i32, i32* %r158
   %r159 = load i32, i32* %r122
-  %r160 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r159
-  %r161 = load i32, i32* %r160
+  %r161 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r159
+  %r160 = load i32, i32* %r161
   %r162 = load i32, i32* %r122
   %r163 = getelementptr [16 x %array2D ], [16 x %array2D ]* @e, i32 0, i32 %r162
   %r164 = getelementptr %array2D, %array2D* %r163, i32 0, i32 0
   %r165 = load i32, i32* %r144
-  %r166 = getelementptr [16 x i32 ], [16 x i32 ]* %r164, i32 0, i32 %r165
-  %r167 = load i32, i32* %r166
-  %r168 = add i32 %r161, %r167
-  %r169 = icmp sgt i32 %r158, %r168
+  %r167 = getelementptr [16 x i32 ], [16 x i32 ]* %r164, i32 0, i32 %r165
+  %r166 = load i32, i32* %r167
+  %r168 = add i32 %r160, %r166
+  %r169 = icmp sgt i32 %r157, %r168
   br i1 %r169, label %if_17_49_true, label %if_17_49_false
 
 if_17_49_true:
   %r170 = load i32, i32* %r144
   %r171 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r170
   %r172 = load i32, i32* %r122
-  %r173 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r172
-  %r174 = load i32, i32* %r173
+  %r174 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r172
+  %r173 = load i32, i32* %r174
   %r175 = load i32, i32* %r122
   %r176 = getelementptr [16 x %array2D ], [16 x %array2D ]* @e, i32 0, i32 %r175
   %r177 = getelementptr %array2D, %array2D* %r176, i32 0, i32 0
   %r178 = load i32, i32* %r144
-  %r179 = getelementptr [16 x i32 ], [16 x i32 ]* %r177, i32 0, i32 %r178
-  %r180 = load i32, i32* %r179
-  %r181 = add i32 %r174, %r180
+  %r180 = getelementptr [16 x i32 ], [16 x i32 ]* %r177, i32 0, i32 %r178
+  %r179 = load i32, i32* %r180
+  %r181 = add i32 %r173, %r179
   store i32 %r181, i32* %r171
   br label %if_17_49_end
 
@@ -288,20 +288,20 @@ while_5_83_bre:
   br label %while_5_93_cond
 
 while_5_93_cond:
-  %r229 = load i32, i32* %r186
-  %r230 = load i32, i32* @n
-  %r231 = icmp sle i32 %r229, %r230
-  br i1 %r231, label %while_5_93_whilestms, label %while_5_93_bre
+  %r230 = load i32, i32* %r186
+  %r231 = load i32, i32* @n
+  %r232 = icmp sle i32 %r230, %r231
+  br i1 %r232, label %while_5_93_whilestms, label %while_5_93_bre
 
 while_5_93_whilestms:
-  %r232 = load i32, i32* %r186
-  %r233 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r232
-  %r234 = load i32, i32* %r233
+  %r233 = load i32, i32* %r186
+  %r235 = getelementptr [16 x i32 ], [16 x i32 ]* @dis, i32 0, i32 %r233
+  %r234 = load i32, i32* %r235
   call void @putint(i32 %r234)
   call void @putch(i32 32)
-  %r235 = load i32, i32* %r186
-  %r236 = add i32 %r235, 1
-  store i32 %r236, i32* %r186
+  %r238 = load i32, i32* %r186
+  %r239 = add i32 %r238, 1
+  store i32 %r239, i32* %r186
   br label %while_5_93_cond
 
 while_5_93_bre:

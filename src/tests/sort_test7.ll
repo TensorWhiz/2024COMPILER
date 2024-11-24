@@ -49,9 +49,9 @@ while_5_23_whilestms:
   %r127 = load i32, i32* %r118
   %r128 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r127
   %r129 = load i32, i32* %r120
-  %r130 = getelementptr i32, i32* %r100, i32 %r129
-  %r131 = load i32, i32* %r130
-  store i32 %r131, i32* %r128
+  %r131 = getelementptr i32, i32* %r100, i32 %r129
+  %r130 = load i32, i32* %r131
+  store i32 %r130, i32* %r128
   %r132 = load i32, i32* %r118
   %r133 = add i32 %r132, 1
   store i32 %r133, i32* %r118
@@ -75,9 +75,9 @@ while_5_28_whilestms:
   %r141 = load i32, i32* %r119
   %r142 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r141
   %r143 = load i32, i32* %r120
-  %r144 = getelementptr i32, i32* %r100, i32 %r143
-  %r145 = load i32, i32* %r144
-  store i32 %r145, i32* %r142
+  %r145 = getelementptr i32, i32* %r100, i32 %r143
+  %r144 = load i32, i32* %r145
+  store i32 %r144, i32* %r142
   %r146 = load i32, i32* %r119
   %r147 = add i32 %r146, 1
   store i32 %r147, i32* %r119
@@ -104,22 +104,22 @@ bb22_37_next:
 
 while_5_37_whilestms:
   %r156 = load i32, i32* %r118
-  %r157 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r156
-  %r158 = load i32, i32* %r157
+  %r158 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r156
+  %r157 = load i32, i32* %r158
   %r159 = load i32, i32* %r119
-  %r160 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r159
-  %r161 = load i32, i32* %r160
-  %r162 = add i32 %r161, 1
-  %r163 = icmp slt i32 %r158, %r162
+  %r161 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r159
+  %r160 = load i32, i32* %r161
+  %r162 = add i32 %r160, 1
+  %r163 = icmp slt i32 %r157, %r162
   br i1 %r163, label %if_9_39_true, label %if_9_39_false
 
 if_9_39_true:
   %r164 = load i32, i32* %r148
   %r165 = getelementptr i32, i32* %r100, i32 %r164
   %r166 = load i32, i32* %r118
-  %r167 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r166
-  %r168 = load i32, i32* %r167
-  store i32 %r168, i32* %r165
+  %r168 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r166
+  %r167 = load i32, i32* %r168
+  store i32 %r167, i32* %r165
   %r169 = load i32, i32* %r148
   %r170 = add i32 %r169, 1
   store i32 %r170, i32* %r148
@@ -132,9 +132,9 @@ if_9_39_false:
   %r173 = load i32, i32* %r148
   %r174 = getelementptr i32, i32* %r100, i32 %r173
   %r175 = load i32, i32* %r119
-  %r176 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r175
-  %r177 = load i32, i32* %r176
-  store i32 %r177, i32* %r174
+  %r177 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r175
+  %r176 = load i32, i32* %r177
+  store i32 %r176, i32* %r174
   %r178 = load i32, i32* %r148
   %r179 = add i32 %r178, 1
   store i32 %r179, i32* %r148
@@ -159,9 +159,9 @@ while_5_50_whilestms:
   %r185 = load i32, i32* %r148
   %r186 = getelementptr i32, i32* %r100, i32 %r185
   %r187 = load i32, i32* %r118
-  %r188 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r187
-  %r189 = load i32, i32* %r188
-  store i32 %r189, i32* %r186
+  %r189 = getelementptr [10 x i32 ], [10 x i32 ]* %r116, i32 0, i32 %r187
+  %r188 = load i32, i32* %r189
+  store i32 %r188, i32* %r186
   %r190 = load i32, i32* %r148
   %r191 = add i32 %r190, 1
   store i32 %r191, i32* %r148
@@ -183,9 +183,9 @@ while_5_55_whilestms:
   %r197 = load i32, i32* %r148
   %r198 = getelementptr i32, i32* %r100, i32 %r197
   %r199 = load i32, i32* %r119
-  %r200 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r199
-  %r201 = load i32, i32* %r200
-  store i32 %r201, i32* %r198
+  %r201 = getelementptr [10 x i32 ], [10 x i32 ]* %r117, i32 0, i32 %r199
+  %r200 = load i32, i32* %r201
+  store i32 %r200, i32* %r198
   %r202 = load i32, i32* %r148
   %r203 = add i32 %r202, 1
   store i32 %r203, i32* %r148
@@ -217,25 +217,22 @@ if_5_65_true:
   %r217 = add i32 %r215, %r216
   %r218 = sdiv i32 %r217, 2
   store i32 %r218, i32* %r214
-  %r220 = getelementptr i32, i32* %r206, i32 0
-  %r221 = load i32, i32* %r208
-  %r222 = load i32, i32* %r214
-  %r223 = call i32 @MergeSort(i32* %r220, i32 %r221, i32 %r222)
-  store i32 %r223, i32* %r219
-  %r224 = load i32, i32* %r214
-  %r225 = add i32 %r224, 1
-  store i32 %r225, i32* %r219
-  %r226 = getelementptr i32, i32* %r206, i32 0
-  %r227 = load i32, i32* %r219
-  %r228 = load i32, i32* %r210
-  %r229 = call i32 @MergeSort(i32* %r226, i32 %r227, i32 %r228)
-  store i32 %r229, i32* %r219
-  %r230 = getelementptr i32, i32* %r206, i32 0
-  %r231 = load i32, i32* %r208
-  %r232 = load i32, i32* %r214
-  %r233 = load i32, i32* %r210
-  %r234 = call i32 @Merge(i32* %r230, i32 %r231, i32 %r232, i32 %r233)
-  store i32 %r234, i32* %r219
+  %r220 = load i32, i32* %r208
+  %r221 = load i32, i32* %r214
+  %r222 = call i32 @MergeSort(i32* %r206, i32 %r220, i32 %r221)
+  store i32 %r222, i32* %r219
+  %r223 = load i32, i32* %r214
+  %r224 = add i32 %r223, 1
+  store i32 %r224, i32* %r219
+  %r225 = load i32, i32* %r219
+  %r226 = load i32, i32* %r210
+  %r227 = call i32 @MergeSort(i32* %r206, i32 %r225, i32 %r226)
+  store i32 %r227, i32* %r219
+  %r228 = load i32, i32* %r208
+  %r229 = load i32, i32* %r214
+  %r230 = load i32, i32* %r210
+  %r231 = call i32 @Merge(i32* %r206, i32 %r228, i32 %r229, i32 %r230)
+  store i32 %r231, i32* %r219
   br label %if_5_65_end
 
 if_5_65_false:
@@ -248,59 +245,59 @@ if_5_65_end:
 define i32 @main( ) {
 main:
   store i32 10, i32* @n
-  %r235 = alloca [ 10 x i32 ]
-  %r236 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 0
-  store i32 4, i32* %r236
-  %r237 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 1
-  store i32 3, i32* %r237
-  %r238 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 2
-  store i32 9, i32* %r238
-  %r239 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 3
-  store i32 2, i32* %r239
-  %r240 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 4
-  store i32 0, i32* %r240
-  %r241 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 5
-  store i32 1, i32* %r241
-  %r242 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 6
-  store i32 6, i32* %r242
-  %r243 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 7
-  store i32 5, i32* %r243
-  %r244 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 8
-  store i32 7, i32* %r244
-  %r245 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 9
-  store i32 8, i32* %r245
-  %r246 = alloca i32
-  store i32 0, i32* %r246
-  %r247 = alloca i32
-  %r248 = load i32, i32* @n
-  %r249 = sub i32 %r248, 1
-  store i32 %r249, i32* %r247
-  %r250 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 0
-  %r251 = load i32, i32* %r246
-  %r252 = load i32, i32* %r247
-  %r253 = call i32 @MergeSort(i32* %r250, i32 %r251, i32 %r252)
-  store i32 %r253, i32* %r246
+  %r232 = alloca [ 10 x i32 ]
+  %r233 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 0
+  store i32 4, i32* %r233
+  %r234 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 1
+  store i32 3, i32* %r234
+  %r235 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 2
+  store i32 9, i32* %r235
+  %r236 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 3
+  store i32 2, i32* %r236
+  %r237 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 4
+  store i32 0, i32* %r237
+  %r238 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 5
+  store i32 1, i32* %r238
+  %r239 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 6
+  store i32 6, i32* %r239
+  %r240 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 7
+  store i32 5, i32* %r240
+  %r241 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 8
+  store i32 7, i32* %r241
+  %r242 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 9
+  store i32 8, i32* %r242
+  %r243 = alloca i32
+  store i32 0, i32* %r243
+  %r244 = alloca i32
+  %r245 = load i32, i32* @n
+  %r246 = sub i32 %r245, 1
+  store i32 %r246, i32* %r244
+  %r247 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 0
+  %r248 = load i32, i32* %r243
+  %r249 = load i32, i32* %r244
+  %r250 = call i32 @MergeSort(i32* %r247, i32 %r248, i32 %r249)
+  store i32 %r250, i32* %r243
   br label %while_5_88_cond
 
 while_5_88_cond:
-  %r254 = load i32, i32* %r246
-  %r255 = load i32, i32* @n
-  %r256 = icmp slt i32 %r254, %r255
-  br i1 %r256, label %while_5_88_whilestms, label %while_5_88_bre
+  %r251 = load i32, i32* %r243
+  %r252 = load i32, i32* @n
+  %r253 = icmp slt i32 %r251, %r252
+  br i1 %r253, label %while_5_88_whilestms, label %while_5_88_bre
 
 while_5_88_whilestms:
-  %r257 = load i32, i32* %r246
-  %r258 = getelementptr [10 x i32 ], [10 x i32 ]* %r235, i32 0, i32 %r257
-  %r259 = load i32, i32* %r258
-  store i32 %r259, i32* %r247
-  %r260 = load i32, i32* %r247
-  call void @putint(i32 %r260)
-  store i32 10, i32* %r247
-  %r261 = load i32, i32* %r247
-  call void @putch(i32 %r261)
-  %r262 = load i32, i32* %r246
-  %r263 = add i32 %r262, 1
-  store i32 %r263, i32* %r246
+  %r254 = load i32, i32* %r243
+  %r256 = getelementptr [10 x i32 ], [10 x i32 ]* %r232, i32 0, i32 %r254
+  %r255 = load i32, i32* %r256
+  store i32 %r255, i32* %r244
+  %r257 = load i32, i32* %r244
+  call void @putint(i32 %r257)
+  store i32 10, i32* %r244
+  %r259 = load i32, i32* %r244
+  call void @putch(i32 %r259)
+  %r261 = load i32, i32* %r243
+  %r262 = add i32 %r261, 1
+  store i32 %r262, i32* %r243
   br label %while_5_88_cond
 
 while_5_88_bre:

@@ -60,13 +60,13 @@ main:
   call void @_sysy_starttime(i32 24)
   store i32 4, i32* @N
   store i32 10, i32* @newline
-  %r121 = alloca i32
   %r122 = alloca i32
-  store i32 1478, i32* %r122
   %r123 = alloca i32
+  store i32 1478, i32* %r123
+  %r124 = alloca i32
   call void @_sysy_stoptime(i32 31)
-  %r124 = load i32, i32* %r122
-  %r125 = call i32 @factor(i32 %r124)
-  ret i32 %r125
+  %r126 = load i32, i32* %r123
+  %r127 = call i32 @factor(i32 %r126)
+  ret i32 %r127
 }
 

@@ -45,16 +45,16 @@ int main(int argc, char * argv[]) {
     
     freopen(argv[1], "r", stdin);  
     ofstream ASTStream;
-    // ASTStream.open(file_name+".ast");
+    ASTStream.open(file_name+".ast");
 
     yyparse();
     
     
     aroot = aA_Program(root);
-    // print_aA_Program(aroot, ASTStream);
-    // ASTStream.close();
+    print_aA_Program(aroot, ASTStream);
+    ASTStream.close();
 
-    // check_Prog(std::cout, aroot);
+    //check_Prog(std::cout, aroot);
 
     ofstream LLVMStream;
     LLVMStream.open(file_name + ".ll");

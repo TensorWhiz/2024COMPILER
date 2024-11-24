@@ -75,19 +75,19 @@ while_5_20_whilestms:                             ; preds = %while_5_20_cond
   br label %while_5_20_cond
 
 while_5_20_bre:                                   ; preds = %while_5_20_cond
-  %r126 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 0
-  %r127 = load i32, i32* %r126, align 4
-  %r128 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 3
-  %r129 = load i32, i32* %r128, align 4
-  %r130 = icmp eq i32 %r127, %r129
+  %r127 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 0
+  %r126 = load i32, i32* %r127, align 4
+  %r129 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 3
+  %r128 = load i32, i32* %r129, align 4
+  %r130 = icmp eq i32 %r126, %r128
   br i1 %r130, label %bb24_27_next, label %if_5_27_false
 
 bb24_27_next:                                     ; preds = %while_5_20_bre
-  %r131 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 1
-  %r132 = load i32, i32* %r131, align 4
-  %r133 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 2
-  %r134 = load i32, i32* %r133, align 4
-  %r135 = icmp eq i32 %r132, %r134
+  %r132 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 1
+  %r131 = load i32, i32* %r132, align 4
+  %r134 = getelementptr [4 x i32], [4 x i32]* %r113, i32 0, i32 2
+  %r133 = load i32, i32* %r134, align 4
+  %r135 = icmp eq i32 %r131, %r133
   br i1 %r135, label %if_5_27_true, label %if_5_27_false
 
 if_5_27_true:                                     ; preds = %bb24_27_next
@@ -122,14 +122,14 @@ if_5_42_true:                                     ; preds = %main
 
 if_5_42_false:                                    ; preds = %main
   store i32 0, i32* %r138, align 4
-  %r144 = load i32, i32* %r138, align 4
-  call void @putint(i32 %r144)
+  %r145 = load i32, i32* %r138, align 4
+  call void @putint(i32 %r145)
   br label %if_5_42_end
 
 if_5_42_end:                                      ; preds = %if_5_42_false, %if_5_42_true
   store i32 10, i32* %r138, align 4
-  %r145 = load i32, i32* %r138, align 4
-  call void @putch(i32 %r145)
+  %r147 = load i32, i32* %r138, align 4
+  call void @putch(i32 %r147)
   ret i32 0
 }
 

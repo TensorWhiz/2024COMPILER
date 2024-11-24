@@ -34,36 +34,36 @@ while_5_13_bre:
 define i32 @main( ) {
 main:
   call void @_sysy_starttime(i32 13)
-  %r109 = alloca i32
-  store i32 0, i32* %r109
   %r110 = alloca i32
   store i32 0, i32* %r110
-  %r111 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 0
-  call void @foo(i32* %r111)
+  %r111 = alloca i32
+  store i32 0, i32* %r111
+  %r112 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 0
+  call void @foo(i32* %r112)
   br label %while_5_25_cond
 
 while_5_25_cond:
-  %r112 = load i32, i32* %r109
-  %r113 = icmp slt i32 %r112, 10
-  br i1 %r113, label %while_5_25_whilestms, label %while_5_25_bre
+  %r114 = load i32, i32* %r110
+  %r115 = icmp slt i32 %r114, 10
+  br i1 %r115, label %while_5_25_whilestms, label %while_5_25_bre
 
 while_5_25_whilestms:
-  %r114 = load i32, i32* %r110
-  %r115 = load i32, i32* %r109
-  %r116 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 %r115
-  %r117 = load i32, i32* %r116
-  %r118 = add i32 %r114, %r117
-  store i32 %r118, i32* %r110
-  %r119 = load i32, i32* %r109
-  %r120 = add i32 %r119, 1
-  store i32 %r120, i32* %r109
+  %r116 = load i32, i32* %r111
+  %r117 = load i32, i32* %r110
+  %r119 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 %r117
+  %r118 = load i32, i32* %r119
+  %r120 = add i32 %r116, %r118
+  store i32 %r120, i32* %r111
+  %r121 = load i32, i32* %r110
+  %r122 = add i32 %r121, 1
+  store i32 %r122, i32* %r110
   br label %while_5_25_cond
 
 while_5_25_bre:
-  %r121 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 0
-  call void @putarray(i32 10, i32* %r121)
-  %r122 = load i32, i32* %r110
-  call void @putint(i32 %r122)
+  %r123 = getelementptr [10 x i32 ], [10 x i32 ]* @b, i32 0, i32 0
+  call void @putarray(i32 10, i32* %r123)
+  %r125 = load i32, i32* %r111
+  call void @putint(i32 %r125)
   call void @_sysy_stoptime(i32 24)
   ret i32 0
 }

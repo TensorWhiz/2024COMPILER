@@ -58,16 +58,16 @@ bb24_17_next:                                     ; preds = %while_5_15_whilestm
 if_9_17_true:                                     ; preds = %bb24_17_next, %while_5_15_whilestms
   br label %while_5_15_cond
 
-bb1:                                              ; No predecessors!
+0:                                                ; No predecessors!
   br label %if_9_17_end
 
 if_9_17_false:                                    ; preds = %bb24_17_next
   br label %while_5_15_bre
 
-bb2:                                              ; No predecessors!
+1:                                                ; No predecessors!
   br label %if_9_17_end
 
-if_9_17_end:                                      ; preds = %bb2, %bb1
+if_9_17_end:                                      ; preds = %1, %0
   br label %while_5_15_cond
 
 while_5_15_bre:                                   ; preds = %if_9_17_false, %while_5_15_cond
@@ -104,10 +104,10 @@ if_9_27_true:                                     ; preds = %bb25_27_next
 if_9_27_false:                                    ; preds = %bb25_27_next, %while_5_25_whilestms
   br label %while_5_25_bre
 
-bb3:                                              ; No predecessors!
+2:                                                ; No predecessors!
   br label %if_9_27_end
 
-if_9_27_end:                                      ; preds = %bb3, %if_9_27_true
+if_9_27_end:                                      ; preds = %2, %if_9_27_true
   br label %while_5_25_cond
 
 while_5_25_bre:                                   ; preds = %if_9_27_false, %while_5_25_cond
@@ -174,9 +174,9 @@ while_5_51_whilestms:                             ; preds = %while_5_51_cond
   %r154 = sub i32 %r153, 1
   store i32 %r154, i32* %r138, align 4
   %r155 = load i32, i32* %r138, align 4
-  %r156 = getelementptr [16 x i32], [16 x i32]* %r137, i32 0, i32 %r155
-  %r157 = load i32, i32* %r156, align 4
-  call void @putch(i32 %r157)
+  %r157 = getelementptr [16 x i32], [16 x i32]* %r137, i32 0, i32 %r155
+  %r156 = load i32, i32* %r157, align 4
+  call void @putch(i32 %r156)
   br label %while_5_51_cond
 
 while_5_51_bre:                                   ; preds = %while_5_51_cond
@@ -185,26 +185,26 @@ while_5_51_bre:                                   ; preds = %while_5_51_cond
 
 define i32 @main() {
 main:
-  %r162 = alloca i32, align 4
-  %r158 = alloca i32, align 4
-  %r159 = call i32 @my_getint()
-  store i32 %r159, i32* %r158, align 4
+  %r163 = alloca i32, align 4
+  %r159 = alloca i32, align 4
+  %r160 = call i32 @my_getint()
+  store i32 %r160, i32* %r159, align 4
   br label %while_5_60_cond
 
 while_5_60_cond:                                  ; preds = %while_5_60_whilestms, %main
-  %r160 = load i32, i32* %r158, align 4
-  %r161 = icmp sgt i32 %r160, 0
-  br i1 %r161, label %while_5_60_whilestms, label %while_5_60_bre
+  %r161 = load i32, i32* %r159, align 4
+  %r162 = icmp sgt i32 %r161, 0
+  br i1 %r162, label %while_5_60_whilestms, label %while_5_60_bre
 
 while_5_60_whilestms:                             ; preds = %while_5_60_cond
-  %r163 = call i32 @my_getint()
-  store i32 %r163, i32* %r162, align 4
-  %r164 = load i32, i32* %r162, align 4
-  call void @my_putint(i32 %r164)
+  %r164 = call i32 @my_getint()
+  store i32 %r164, i32* %r163, align 4
+  %r165 = load i32, i32* %r163, align 4
+  call void @my_putint(i32 %r165)
   call void @putch(i32 10)
-  %r165 = load i32, i32* %r158, align 4
-  %r166 = sub i32 %r165, 1
-  store i32 %r166, i32* %r158, align 4
+  %r168 = load i32, i32* %r159, align 4
+  %r169 = sub i32 %r168, 1
+  store i32 %r169, i32* %r159, align 4
   br label %while_5_60_cond
 
 while_5_60_bre:                                   ; preds = %while_5_60_cond

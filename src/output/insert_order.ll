@@ -43,9 +43,9 @@ insert:
 while_5_16_cond:                                  ; preds = %while_5_16_whilestms, %insert
   %r105 = load i32, i32* %r102, align 4
   %r106 = load i32, i32* %r103, align 4
-  %r107 = getelementptr i32, i32* %r100, i32 %r106
-  %r108 = load i32, i32* %r107, align 4
-  %r109 = icmp sgt i32 %r105, %r108
+  %r108 = getelementptr i32, i32* %r100, i32 %r106
+  %r107 = load i32, i32* %r108, align 4
+  %r109 = icmp sgt i32 %r105, %r107
   br i1 %r109, label %bb21_16_next, label %while_5_16_bre
 
 bb21_16_next:                                     ; preds = %while_5_16_cond
@@ -78,9 +78,9 @@ while_5_22_whilestms:                             ; preds = %while_5_22_cond
   %r122 = load i32, i32* %r104, align 4
   %r123 = getelementptr i32, i32* %r100, i32 %r122
   %r124 = load i32, i32* %r119, align 4
-  %r125 = getelementptr i32, i32* %r100, i32 %r124
-  %r126 = load i32, i32* %r125, align 4
-  store i32 %r126, i32* %r123, align 4
+  %r126 = getelementptr i32, i32* %r100, i32 %r124
+  %r125 = load i32, i32* %r126, align 4
+  store i32 %r125, i32* %r123, align 4
   %r127 = load i32, i32* %r103, align 4
   %r128 = getelementptr i32, i32* %r100, i32 %r127
   %r129 = load i32, i32* %r102, align 4
@@ -137,17 +137,17 @@ while_5_54_cond:                                  ; preds = %while_5_54_whilestm
 
 while_5_54_whilestms:                             ; preds = %while_5_54_cond
   %r152 = load i32, i32* %r144, align 4
-  %r153 = getelementptr [11 x i32], [11 x i32]* %r132, i32 0, i32 %r152
-  %r154 = load i32, i32* %r153, align 4
-  store i32 %r154, i32* %r143, align 4
+  %r154 = getelementptr [11 x i32], [11 x i32]* %r132, i32 0, i32 %r152
+  %r153 = load i32, i32* %r154, align 4
+  store i32 %r153, i32* %r143, align 4
   %r155 = load i32, i32* %r143, align 4
   call void @putint(i32 %r155)
   store i32 10, i32* %r143, align 4
-  %r156 = load i32, i32* %r143, align 4
-  call void @putch(i32 %r156)
-  %r157 = load i32, i32* %r144, align 4
-  %r158 = add i32 %r157, 1
-  store i32 %r158, i32* %r144, align 4
+  %r157 = load i32, i32* %r143, align 4
+  call void @putch(i32 %r157)
+  %r159 = load i32, i32* %r144, align 4
+  %r160 = add i32 %r159, 1
+  store i32 %r160, i32* %r144, align 4
   br label %while_5_54_cond
 
 while_5_54_bre:                                   ; preds = %while_5_54_cond

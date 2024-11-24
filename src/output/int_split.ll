@@ -103,16 +103,16 @@ while_5_43_cond:                                  ; preds = %while_5_43_whilestm
 
 while_5_43_whilestms:                             ; preds = %while_5_43_cond
   %r136 = load i32, i32* %r127, align 4
-  %r137 = getelementptr [4 x i32], [4 x i32]* %r129, i32 0, i32 %r136
-  %r138 = load i32, i32* %r137, align 4
-  store i32 %r138, i32* %r133, align 4
+  %r138 = getelementptr [4 x i32], [4 x i32]* %r129, i32 0, i32 %r136
+  %r137 = load i32, i32* %r138, align 4
+  store i32 %r137, i32* %r133, align 4
   %r139 = load i32, i32* %r133, align 4
   call void @putint(i32 %r139)
-  %r140 = load i32, i32* @newline, align 4
-  call void @putch(i32 %r140)
-  %r141 = load i32, i32* %r127, align 4
-  %r142 = add i32 %r141, 1
-  store i32 %r142, i32* %r127, align 4
+  %r141 = load i32, i32* @newline, align 4
+  call void @putch(i32 %r141)
+  %r143 = load i32, i32* %r127, align 4
+  %r144 = add i32 %r143, 1
+  store i32 %r144, i32* %r127, align 4
   br label %while_5_43_cond
 
 while_5_43_bre:                                   ; preds = %while_5_43_cond

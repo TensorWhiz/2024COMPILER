@@ -23,6 +23,8 @@ paramMemberMap struct2Members;
 //记录已def的函数
 funcSet defined_funcs;
 
+deduced_map dmap;
+
 
 // private util functions
 void error_print(std::ostream& out, A_pos p, string info){
@@ -180,6 +182,7 @@ void check_VarDecl(std::ostream& out, aA_varDeclStmt vd){
         }
         tc_type t = tc_Type(vdecl);
         curr_map->insert({name, t});
+        dmap.insert({name,vdecl});
 
     }
     else if (vd->kind == A_varDeclStmtType::A_varDefKind){
@@ -430,6 +433,8 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
             //找到--1.没类型 2.1 有类型不匹配 2.2 有类型匹配
             if(tc_tp->type == nullptr){
                 curr_map->find(name)->second = deduced_type;
+                dmap.find(name)->second->kind= A_varDeclScalarKind;
+                dmap.find(name)->second->u.declScalar->type=deduced_type->type;
             }
             else{
                 if(!comp_tc_type(tc_tp, deduced_type)){
@@ -449,6 +454,7 @@ void check_AssignStmt(std::ostream& out, aA_assignStmt as){
                 error_print(out, as->pos, "Variable not defined!");
             //找到--1.没类型 2.1 有类型不匹配 2.2 有类型匹配
             if(tc_tp->type == nullptr){
+                tc_tp->type=deduced_type->type;
                 curr_map->find(name)->second = deduced_type;
             }
             else{

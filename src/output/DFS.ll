@@ -108,17 +108,17 @@ if_5_23_true:                                     ; preds = %while_5_19_bre
   %r124 = sub i32 0, %r123
   ret i32 %r124
 
-bb1:                                              ; No predecessors!
+0:                                                ; No predecessors!
   br label %if_5_23_end
 
 if_5_23_false:                                    ; preds = %while_5_19_bre
   %r125 = load i32, i32* %r102, align 4
   ret i32 %r125
 
-bb2:                                              ; No predecessors!
+1:                                                ; No predecessors!
   br label %if_5_23_end
 
-if_5_23_end:                                      ; preds = %bb2, %bb1
+if_5_23_end:                                      ; preds = %1, %0
   ret i32 0
 }
 
@@ -135,9 +135,9 @@ addedge:
   %r133 = load i32, i32* @cnt, align 4
   %r134 = getelementptr [5005 x i32], [5005 x i32]* @next, i32 0, i32 %r133
   %r135 = load i32, i32* %r127, align 4
-  %r136 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r135
-  %r137 = load i32, i32* %r136, align 4
-  store i32 %r137, i32* %r134, align 4
+  %r137 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r135
+  %r136 = load i32, i32* %r137, align 4
+  store i32 %r136, i32* %r134, align 4
   %r138 = load i32, i32* %r127, align 4
   %r139 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r138
   %r140 = load i32, i32* @cnt, align 4
@@ -152,9 +152,9 @@ addedge:
   %r146 = load i32, i32* @cnt, align 4
   %r147 = getelementptr [5005 x i32], [5005 x i32]* @next, i32 0, i32 %r146
   %r148 = load i32, i32* %r129, align 4
-  %r149 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r148
-  %r150 = load i32, i32* %r149, align 4
-  store i32 %r150, i32* %r147, align 4
+  %r150 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r148
+  %r149 = load i32, i32* %r150, align 4
+  store i32 %r149, i32* %r147, align 4
   %r151 = load i32, i32* %r129, align 4
   %r152 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r151
   %r153 = load i32, i32* @cnt, align 4
@@ -234,17 +234,17 @@ same:
 if_5_67_true:                                     ; preds = %same
   ret i32 1
 
-bb3:                                              ; No predecessors!
+0:                                                ; No predecessors!
   br label %if_5_67_end
 
 if_5_67_false:                                    ; preds = %same
   br label %if_5_67_end
 
-if_5_67_end:                                      ; preds = %if_5_67_false, %bb3
+if_5_67_end:                                      ; preds = %if_5_67_false, %0
   %r182 = load i32, i32* %r173, align 4
-  %r183 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r182
-  %r184 = load i32, i32* %r183, align 4
-  store i32 %r184, i32* %r181, align 4
+  %r184 = getelementptr [1005 x i32], [1005 x i32]* @head, i32 0, i32 %r182
+  %r183 = load i32, i32* %r184, align 4
+  store i32 %r183, i32* %r181, align 4
   br label %while_5_71_cond
 
 while_5_71_cond:                                  ; preds = %if_9_73_end, %if_5_67_end
@@ -255,13 +255,13 @@ while_5_71_cond:                                  ; preds = %if_9_73_end, %if_5_
 
 while_5_71_whilestms:                             ; preds = %while_5_71_cond
   %r189 = load i32, i32* %r181, align 4
-  %r190 = getelementptr [5005 x i32], [5005 x i32]* @to, i32 0, i32 %r189
-  %r191 = load i32, i32* %r190, align 4
-  store i32 %r191, i32* %r188, align 4
+  %r191 = getelementptr [5005 x i32], [5005 x i32]* @to, i32 0, i32 %r189
+  %r190 = load i32, i32* %r191, align 4
+  store i32 %r190, i32* %r188, align 4
   %r192 = load i32, i32* %r188, align 4
-  %r193 = getelementptr [1005 x i32], [1005 x i32]* @vis, i32 0, i32 %r192
-  %r194 = load i32, i32* %r193, align 4
-  %r195 = icmp eq i32 %r194, 0
+  %r194 = getelementptr [1005 x i32], [1005 x i32]* @vis, i32 0, i32 %r192
+  %r193 = load i32, i32* %r194, align 4
+  %r195 = icmp eq i32 %r193, 0
   br i1 %r195, label %bb28_73_next, label %if_9_73_false
 
 bb28_73_next:                                     ; preds = %while_5_71_whilestms
@@ -274,17 +274,17 @@ bb28_73_next:                                     ; preds = %while_5_71_whilestm
 if_9_73_true:                                     ; preds = %bb28_73_next
   ret i32 1
 
-bb4:                                              ; No predecessors!
+1:                                                ; No predecessors!
   br label %if_9_73_end
 
 if_9_73_false:                                    ; preds = %bb28_73_next, %while_5_71_whilestms
   br label %if_9_73_end
 
-if_9_73_end:                                      ; preds = %if_9_73_false, %bb4
+if_9_73_end:                                      ; preds = %if_9_73_false, %1
   %r200 = load i32, i32* %r181, align 4
-  %r201 = getelementptr [5005 x i32], [5005 x i32]* @next, i32 0, i32 %r200
-  %r202 = load i32, i32* %r201, align 4
-  store i32 %r202, i32* %r181, align 4
+  %r202 = getelementptr [5005 x i32], [5005 x i32]* @next, i32 0, i32 %r200
+  %r201 = load i32, i32* %r202, align 4
+  store i32 %r201, i32* %r181, align 4
   br label %while_5_71_cond
 
 while_5_71_bre:                                   ; preds = %while_5_71_cond
@@ -298,71 +298,71 @@ main:
   %r204 = call i32 @quickread()
   store i32 %r204, i32* @m, align 4
   call void @init()
-  %r205 = alloca i32, align 4
-  store i32 0, i32* %r205, align 4
   %r206 = alloca i32, align 4
   store i32 0, i32* %r206, align 4
   %r207 = alloca i32, align 4
   store i32 0, i32* %r207, align 4
+  %r208 = alloca i32, align 4
+  store i32 0, i32* %r208, align 4
   br label %while_5_87_cond
 
 while_5_87_cond:                                  ; preds = %if_9_92_end, %main
-  %r208 = load i32, i32* @m, align 4
-  %r209 = icmp ne i32 %r208, 0
-  br i1 %r209, label %while_5_87_whilestms, label %while_5_87_bre
+  %r209 = load i32, i32* @m, align 4
+  %r210 = icmp ne i32 %r209, 0
+  br i1 %r210, label %while_5_87_whilestms, label %while_5_87_bre
 
 while_5_87_whilestms:                             ; preds = %while_5_87_cond
-  %r210 = call i32 @getch()
-  store i32 %r210, i32* %r205, align 4
+  %r211 = call i32 @getch()
+  store i32 %r211, i32* %r206, align 4
   br label %while_9_89_cond
 
 while_9_89_cond:                                  ; preds = %while_9_89_whilestms, %while_5_87_whilestms
-  %r211 = load i32, i32* %r205, align 4
-  %r212 = icmp ne i32 %r211, 81
-  br i1 %r212, label %bb30_89_next, label %while_9_89_bre
+  %r212 = load i32, i32* %r206, align 4
+  %r213 = icmp ne i32 %r212, 81
+  br i1 %r213, label %bb30_89_next, label %while_9_89_bre
 
 bb30_89_next:                                     ; preds = %while_9_89_cond
-  %r213 = load i32, i32* %r205, align 4
-  %r214 = icmp ne i32 %r213, 85
-  br i1 %r214, label %while_9_89_whilestms, label %while_9_89_bre
+  %r214 = load i32, i32* %r206, align 4
+  %r215 = icmp ne i32 %r214, 85
+  br i1 %r215, label %while_9_89_whilestms, label %while_9_89_bre
 
 while_9_89_whilestms:                             ; preds = %bb30_89_next
-  %r215 = call i32 @getch()
-  store i32 %r215, i32* %r205, align 4
+  %r216 = call i32 @getch()
+  store i32 %r216, i32* %r206, align 4
   br label %while_9_89_cond
 
 while_9_89_bre:                                   ; preds = %bb30_89_next, %while_9_89_cond
-  %r216 = load i32, i32* %r205, align 4
-  %r217 = icmp eq i32 %r216, 81
-  br i1 %r217, label %if_9_92_true, label %if_9_92_false
+  %r217 = load i32, i32* %r206, align 4
+  %r218 = icmp eq i32 %r217, 81
+  br i1 %r218, label %if_9_92_true, label %if_9_92_false
 
 if_9_92_true:                                     ; preds = %while_9_89_bre
-  %r218 = call i32 @quickread()
-  store i32 %r218, i32* %r206, align 4
   %r219 = call i32 @quickread()
   store i32 %r219, i32* %r207, align 4
+  %r220 = call i32 @quickread()
+  store i32 %r220, i32* %r208, align 4
   call void @clear()
-  %r220 = load i32, i32* %r206, align 4
-  %r221 = load i32, i32* %r207, align 4
-  %r222 = call i32 @same(i32 %r220, i32 %r221)
-  call void @putint(i32 %r222)
+  %r222 = load i32, i32* %r207, align 4
+  %r223 = load i32, i32* %r208, align 4
+  %r224 = call i32 @same(i32 %r222, i32 %r223)
+  call void @putint(i32 %r224)
   call void @putch(i32 10)
   br label %if_9_92_end
 
 if_9_92_false:                                    ; preds = %while_9_89_bre
-  %r223 = call i32 @quickread()
-  store i32 %r223, i32* %r206, align 4
-  %r224 = call i32 @quickread()
-  store i32 %r224, i32* %r207, align 4
-  %r225 = load i32, i32* %r206, align 4
-  %r226 = load i32, i32* %r207, align 4
-  call void @addedge(i32 %r225, i32 %r226)
+  %r227 = call i32 @quickread()
+  store i32 %r227, i32* %r207, align 4
+  %r228 = call i32 @quickread()
+  store i32 %r228, i32* %r208, align 4
+  %r229 = load i32, i32* %r207, align 4
+  %r230 = load i32, i32* %r208, align 4
+  call void @addedge(i32 %r229, i32 %r230)
   br label %if_9_92_end
 
 if_9_92_end:                                      ; preds = %if_9_92_false, %if_9_92_true
-  %r227 = load i32, i32* @m, align 4
-  %r228 = sub i32 %r227, 1
-  store i32 %r228, i32* @m, align 4
+  %r232 = load i32, i32* @m, align 4
+  %r233 = sub i32 %r232, 1
+  store i32 %r233, i32* @m, align 4
   br label %while_5_87_cond
 
 while_5_87_bre:                                   ; preds = %while_5_87_cond

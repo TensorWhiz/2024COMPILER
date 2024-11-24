@@ -34,13 +34,11 @@ bb24_17_next:
 if_9_17_true:
   br label %while_5_15_cond
 
-bb1:
   br label %if_9_17_end
 
 if_9_17_false:
   br label %while_5_15_bre
 
-bb2:
   br label %if_9_17_end
 
 if_9_17_end:
@@ -80,7 +78,6 @@ if_9_27_true:
 if_9_27_false:
   br label %while_5_25_bre
 
-bb3:
   br label %if_9_27_end
 
 if_9_27_end:
@@ -150,9 +147,9 @@ while_5_51_whilestms:
   %r154 = sub i32 %r153, 1
   store i32 %r154, i32* %r138
   %r155 = load i32, i32* %r138
-  %r156 = getelementptr [16 x i32 ], [16 x i32 ]* %r137, i32 0, i32 %r155
-  %r157 = load i32, i32* %r156
-  call void @putch(i32 %r157)
+  %r157 = getelementptr [16 x i32 ], [16 x i32 ]* %r137, i32 0, i32 %r155
+  %r156 = load i32, i32* %r157
+  call void @putch(i32 %r156)
   br label %while_5_51_cond
 
 while_5_51_bre:
@@ -161,26 +158,26 @@ while_5_51_bre:
 
 define i32 @main( ) {
 main:
-  %r162 = alloca i32
-  %r158 = alloca i32
-  %r159 = call i32 @my_getint()
-  store i32 %r159, i32* %r158
+  %r163 = alloca i32
+  %r159 = alloca i32
+  %r160 = call i32 @my_getint()
+  store i32 %r160, i32* %r159
   br label %while_5_60_cond
 
 while_5_60_cond:
-  %r160 = load i32, i32* %r158
-  %r161 = icmp sgt i32 %r160, 0
-  br i1 %r161, label %while_5_60_whilestms, label %while_5_60_bre
+  %r161 = load i32, i32* %r159
+  %r162 = icmp sgt i32 %r161, 0
+  br i1 %r162, label %while_5_60_whilestms, label %while_5_60_bre
 
 while_5_60_whilestms:
-  %r163 = call i32 @my_getint()
-  store i32 %r163, i32* %r162
-  %r164 = load i32, i32* %r162
-  call void @my_putint(i32 %r164)
+  %r164 = call i32 @my_getint()
+  store i32 %r164, i32* %r163
+  %r165 = load i32, i32* %r163
+  call void @my_putint(i32 %r165)
   call void @putch(i32 10)
-  %r165 = load i32, i32* %r158
-  %r166 = sub i32 %r165, 1
-  store i32 %r166, i32* %r158
+  %r168 = load i32, i32* %r159
+  %r169 = sub i32 %r168, 1
+  store i32 %r169, i32* %r159
   br label %while_5_60_cond
 
 while_5_60_bre:
