@@ -584,6 +584,9 @@ Func_local *ast2llvmFunc(aA_fnDef f)
         else
             assert(0);
     }
+
+
+
     // 处理函数体的语句块
     for (auto &stmt : f->stmts)
     {
@@ -774,39 +777,35 @@ void ast2llvmStmtassign(aA_assignStmt s)
 
 void ast2llvmStmtcall(aA_callStmt s)
 {
-    ast2llvmfnCall(s->fnCall);
+        string funcName = *s->fnCall->fn;
+        vector<AS_operand *> args;
+        for (const auto &val : s->fnCall->vals)
+        {
+            args.push_back(ast2llvmRightVal(val));
+        }
+        if (funcReturnMap.find(funcName) != funcReturnMap.end())
+        {
+            emit_irs.push_back(L_Voidcall(funcName, args));
+        }
+        else
+            assert(0);
 }
 
 AS_operand *ast2llvmfnCall(aA_fnCall callExpr)
 {
-    vector<AS_operand *> args;
-    for (auto val : callExpr->vals)
-    {
-        args.push_back(ast2llvmRightVal(val));
-    }
-
-    AS_operand *res;
-
     if (funcReturnMap.find(*callExpr->fn) != funcReturnMap.end())
-    {
-        res = AS_Operand_Temp(Temp_newtemp_int());
-        string name = *callExpr->fn;
-        FuncType funcType = funcReturnMap[name];
-        if (funcType.type == ReturnType::VOID_TYPE)
         {
-            emit_irs.push_back(L_Voidcall(name, args));
-        }
-        else if (funcType.type == ReturnType::INT_TYPE)
-        {
-            emit_irs.push_back(L_Call(name, res, args));
+            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+            vector<AS_operand *> args;
+            for (auto val : callExpr->vals)
+            {
+                args.push_back(ast2llvmRightVal(val));
+            }
+            emit_irs.push_back(L_Call(*callExpr->fn, res, args));
+            return res;
         }
         else
             assert(0);
-    }
-    else
-        assert(0);
-
-    return res;
 }
 
 void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label)
