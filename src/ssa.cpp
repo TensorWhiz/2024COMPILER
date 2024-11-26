@@ -61,10 +61,10 @@ LLVMIR::L_prog *SSA(LLVMIR::L_prog *prog)
         Liveness(RA_bg.mynodes[0], RA_bg, fun->args);
         // 计算每个节点的必经节点
         Dominators(RA_bg);
-        printf_domi();
+        //printf_domi();
         // 计算必经节点树
         tree_Dominators(RA_bg);
-        printf_D_tree();
+        //printf_D_tree();
         //  默认0是入口block
         // 计算支配边界
         computeDF(RA_bg, RA_bg.mynodes[0]);
@@ -533,7 +533,7 @@ void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
                     //找到block y
                     int node_id = bg.findNode(y);
                     Node<L_block*>* y_node = bg.mynodes[node_id];
-                    //新建操作数
+                    //新建操作数，构建phi指令
                     AS_operand* dst = AS_Operand_Temp(pair.first);
                     std::vector<std::pair<AS_operand*, Temp_label*>> phis;
 
@@ -541,6 +541,7 @@ void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
                         Node<L_block*>* pred = bg.mynodes[pred_id];
                         phis.push_back({dst, pred->nodeInfo()->label});
                     }
+                    
                     //避开label插入phi
                     auto it = y->instrs.begin();
                     it++;
@@ -668,7 +669,6 @@ static void Rename_temp(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR:
         }
     }
 
-    std::cout<<"succ finished"<<std::endl;
 
     // 处理子节点
     for (auto &son : tree_dominators[n->info].succs)
@@ -688,12 +688,39 @@ static void Rename_temp(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR:
 }
 void Rename(GRAPH::Graph<LLVMIR::L_block *> &bg)
 {
-   unordered_map<Temp_temp*, stack<Temp_temp*>> stack;
-    for(auto pair:temp2ASoper){
-        stack[pair.second->u.TEMP].push(pair.second->u.TEMP);
+   TempSet_ temp_list_def;
+    TempSet_ temp_list_use;
+    int count = 0;
+    unordered_map<Temp_temp*, stack<Temp_temp*>> Stack;
+    unordered_map<Temp_temp*, int> Count;
+
+    for (int i = 0; i < bg.nodecount; i++){
+        if (!bg.mynodes[i]){
+            continue;
+        }
+        temp_list_def = FG_def(bg.mynodes[i]);
+        temp_list_use = FG_use(bg.mynodes[i]);
+        for (auto& temp_def: temp_list_def){
+            if (Stack.find(temp_def) == Stack.end()){
+                count = 0;
+                Count[temp_def] = count;
+                stack<Temp_temp*> stack_empty;
+                stack_empty.emplace(temp_def);
+                Stack[temp_def] = stack_empty;
+            }
+        }
+
+        for (auto& temp_use: temp_list_use){
+            if (Stack.find(temp_use) == Stack.end()){
+                count = 0;
+                Count[temp_use] = count;
+                stack<Temp_temp*> stack_empty;
+                stack_empty.emplace(temp_use);
+                Stack[temp_use] = stack_empty;
+            }
+        }
     }
-    Rename_temp(bg, bg.mynodes[0], stack);
-    std::cout << "rename finish" << std::endl;
+    Rename_temp(bg, bg.mynodes[0], Stack);
 }
 
 template <typename T>
