@@ -55,26 +55,25 @@ LLVMIR::L_prog *SSA(LLVMIR::L_prog *prog)
         mem2reg(fun);
         auto RA_bg = Create_bg(fun->blocks);
         // printL_block(cout,RA_bg.mynodes[0]->info);
-        //删除不可达代码 todo
+        // 删除不可达代码
         SingleSourceGraph(RA_bg.mynodes[0], RA_bg, fun);
-        //活动性分析
+        // 活动性分析
         Liveness(RA_bg.mynodes[0], RA_bg, fun->args);
-        //计算每个节点的必经节点
+        // 计算每个节点的必经节点
         Dominators(RA_bg);
-        // printf_domi();
-        //计算必经节点树
+        printf_domi();
+        // 计算必经节点树
         tree_Dominators(RA_bg);
-        // printf_D_tree();
-        // 默认0是入口block
-        //计算支配边界
+        printf_D_tree();
+        //  默认0是入口block
+        // 计算支配边界
         computeDF(RA_bg, RA_bg.mynodes[0]);
-        // Show_graph(stdout,RA_bg);
-        // printf_DF();
-        //插Phi
+        //Show_graph(stdout,RA_bg);
+        //printf_DF();
+        // 插Phi
         Place_phi_fu(RA_bg, fun);
-        //变量重命名
+        // 变量重命名
         Rename(RA_bg);
-        //
         combine_addr(fun);
     }
     return prog;
@@ -134,90 +133,93 @@ void combine_addr(LLVMIR::L_func *fun)
 */
 void mem2reg(LLVMIR::L_func *fun)
 {
-    // for (auto block : fun->blocks)
-    // {
-    //     auto it = block->instrs.begin();
-    //     while(it != block->instrs.end())
-    //     {
-    //         L_stm *stm = *it;
-    //         if (stm->type == L_StmKind::T_ALLOCA)
-    //         {
-    //             if (is_mem_variable(stm))
-    //             {
-    //                 AS_operand *new_oper = AS_Operand_Temp(Temp_newtemp_int());
-    //                 temp2ASoper[stm->u.ALLOCA->dst->u.TEMP] = new_oper;
-    //                 *it = L_Move(AS_Operand_Const(0), new_oper);
-    //             }
-    //         }
-    //         else if (stm->type == L_StmKind::T_STORE)
-    //         {
-    //             AS_operand *ptr = stm->u.STORE->ptr;
-    //             AS_operand *src = stm->u.STORE->src;
+   /* for (auto block : fun->blocks)
+    {
+        auto it = block->instrs.begin();
+        while(it != block->instrs.end())
+        {
+            L_stm *stm = *it;
+            if (stm->type == L_StmKind::T_ALLOCA)
+            {
+                if (is_mem_variable(stm))
+                {
+                    AS_operand *new_oper = AS_Operand_Temp(Temp_newtemp_int());
+                    temp2ASoper[stm->u.ALLOCA->dst->u.TEMP] = new_oper;
+                    *it = L_Move(AS_Operand_Const(0), new_oper);
+                }
+            }
+            else if (stm->type == L_StmKind::T_STORE)
+            {
+                AS_operand *ptr = stm->u.STORE->ptr;
+                AS_operand *src = stm->u.STORE->src;
 
-    //             if (src->kind == OperandKind::TEMP &&
-    //                 src->u.TEMP->type == TempType::INT_TEMP &&
-    //                 temp2ASoper.find(src->u.TEMP) != temp2ASoper.end())
-    //             {
-    //                 src = temp2ASoper[src->u.TEMP]; // 将src指向寄存器
-    //                 stm->u.STORE->src = src;
-    //             }
+                if (src->kind == OperandKind::TEMP &&
+                    src->u.TEMP->type == TempType::INT_TEMP &&
+                    temp2ASoper.find(src->u.TEMP) != temp2ASoper.end())
+                {
+                    src = temp2ASoper[src->u.TEMP]; // 将src指向寄存器
+                    stm->u.STORE->src = src;
+                }
 
-    //             if (ptr->kind == OperandKind::TEMP &&
-    //                 ptr->u.TEMP->type == TempType::INT_PTR &&
-    //                 ptr->u.TEMP->len == 0 &&
-    //                 temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end())
-    //             {
-    //                 // 找到对应ptr寄存器
-    //                 *it = L_Move(src, temp2ASoper[ptr->u.TEMP]);
-    //                 // 直接将src移到寄存器
-    //             }
-    //             // 找不到对应ptr寄存器，保留store
-    //         }
-    //         else if (stm->type == L_StmKind::T_LOAD)
-    //         {
-    //             AS_operand *dst = stm->u.LOAD->dst;
-    //             AS_operand *ptr = stm->u.LOAD->ptr;
-                
-    //             if (ptr->kind == OperandKind::TEMP &&
-    //                 (temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end())) //如果ptr有对应寄存器
-    //             {
-    //                 if (dst->kind == OperandKind::TEMP)
-    //                 {
-    //                     temp2ASoper[dst->u.TEMP] = temp2ASoper[ptr->u.TEMP];
-    //                     it = block->instrs.erase(it);
-    //                     continue;
-    //                 }
-    //             }
-    //         }
-    //         else
-    //         {   
-    //             list<AS_operand **> as_list = get_all_AS_operand(stm);
-    //             for (auto as : as_list)
-    //             {
-    //                 AS_operand *oper = *as;
-    //                 if (oper->kind == OperandKind::TEMP && 
-    //                 oper->u.TEMP->type == TempType::INT_TEMP && 
-    //                 temp2ASoper.find(oper->u.TEMP)!=temp2ASoper.end())
-    //                 {
-    //                     *as =temp2ASoper[oper->u.TEMP];
-    //                 }
-    //             }
+                if (ptr->kind == OperandKind::TEMP &&
+                    ptr->u.TEMP->type == TempType::INT_PTR &&
+                    ptr->u.TEMP->len == 0 &&
+                    temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end())
+                {
+                    // 找到对应ptr寄存器
+                    *it = L_Move(src, temp2ASoper[ptr->u.TEMP]);
+                    // 直接将src移到寄存器
+                }
+                // 找不到对应ptr寄存器，保留store
+            }
+            else if (stm->type == L_StmKind::T_LOAD)
+            {
+                AS_operand *dst = stm->u.LOAD->dst;
+                AS_operand *ptr = stm->u.LOAD->ptr;
 
-    //         }
-    //         ++it;
-    //     }
-    // }
-     // 将alloca语句转换为move
-    for(auto block : fun->blocks){
-        for(auto it = block->instrs.begin(); it!=block->instrs.end(); it++){
-            L_stm* stm = *it;
-            if(is_mem_variable(stm)){
+                if (ptr->kind == OperandKind::TEMP &&
+                    (temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end())) //如果ptr有对应寄存器
+                {
+                    if (dst->kind == OperandKind::TEMP)
+                    {
+                        temp2ASoper[dst->u.TEMP] = temp2ASoper[ptr->u.TEMP];
+                        it = block->instrs.erase(it);
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                list<AS_operand **> as_list = get_all_AS_operand(stm);
+                for (auto as : as_list)
+                {
+                    AS_operand *oper = *as;
+                    if (oper->kind == OperandKind::TEMP &&
+                    oper->u.TEMP->type == TempType::INT_TEMP &&
+                    temp2ASoper.find(oper->u.TEMP)!=temp2ASoper.end())
+                    {
+                        *as =temp2ASoper[oper->u.TEMP];
+                    }
+                }
+
+            }
+            ++it;
+        }
+    }*/
+    // 将alloca语句转换为move
+    for (auto block : fun->blocks)
+    {
+        for (auto it = block->instrs.begin(); it != block->instrs.end(); it++)
+        {
+            L_stm *stm = *it;
+            if (is_mem_variable(stm))
+            {
                 Temp_temp *new_temp = Temp_newtemp_int();
                 AS_operand *new_oper = AS_Operand_Temp(new_temp);
 
                 // 将旧的temp映射到新的temp
                 temp2ASoper[stm->u.ALLOCA->dst->u.TEMP] = new_oper;
-                
+
                 // 默认值为0
                 *it = L_Move(AS_Operand_Const(0), new_oper);
             }
@@ -225,105 +227,125 @@ void mem2reg(LLVMIR::L_func *fun)
     }
 
     // 记录将栈上的标量load到的寄存器，然后在普通语句中进行替换
-    unordered_map<Temp_temp*, AS_operand*> loadTemp2ASOper;
+    unordered_map<Temp_temp *, AS_operand *> loadTemp2ASOper;
 
-    for(auto block : fun->blocks){
-        for(auto it = block->instrs.begin(); it!=block->instrs.end(); ){
-            L_stm* stm = *it;
-            switch(stm->type){
-                case L_StmKind::T_STORE:{
-                    AS_operand* ptr = stm->u.STORE->ptr;
-                    AS_operand* src = stm->u.STORE->src;
-                    if(src->kind==OperandKind::TEMP && src->u.TEMP->type==TempType::INT_TEMP && loadTemp2ASOper.find(src->u.TEMP)!=loadTemp2ASOper.end()){
-                        src = loadTemp2ASOper[src->u.TEMP];
-                        stm->u.STORE->src = src;
-                    }
-                    if(ptr->kind==OperandKind::TEMP && ptr->u.TEMP->type==TempType::INT_PTR && ptr->u.TEMP->len==0 && temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end()){
-                        *it = L_Move(src, temp2ASoper[ptr->u.TEMP]);
-                    }
-                    break;
+    for (auto block : fun->blocks)
+    {
+        for (auto it = block->instrs.begin(); it != block->instrs.end();)
+        {
+            L_stm *stm = *it;
+            switch (stm->type)
+            {
+            case L_StmKind::T_STORE:
+            {
+                AS_operand *ptr = stm->u.STORE->ptr;
+                AS_operand *src = stm->u.STORE->src;
+                if (src->kind == OperandKind::TEMP && src->u.TEMP->type == TempType::INT_TEMP && loadTemp2ASOper.find(src->u.TEMP) != loadTemp2ASOper.end())
+                {
+                    src = loadTemp2ASOper[src->u.TEMP];
+                    stm->u.STORE->src = src;
                 }
-                case L_StmKind::T_LOAD:{
-                    AS_operand* dst = stm->u.LOAD->dst;
-                    AS_operand* ptr = stm->u.LOAD->ptr;
-                    if(ptr->kind==OperandKind::TEMP && ptr->u.TEMP->type==TempType::INT_PTR && ptr->u.TEMP->len==0 && (temp2ASoper.find(ptr->u.TEMP)!=temp2ASoper.end())){
-                        if(dst->kind==OperandKind::TEMP){
-                            loadTemp2ASOper[dst->u.TEMP] = temp2ASoper[ptr->u.TEMP];
-                            auto old_it = it;
-                            it++;
-                            block->instrs.erase(old_it);
-                            continue;
-                        }
-                        else{
-                            assert(0);
-                        }
-                    }
-                    break;
+                if (ptr->kind == OperandKind::TEMP && ptr->u.TEMP->type == TempType::INT_PTR && ptr->u.TEMP->len == 0 && temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end())
+                {
+                    *it = L_Move(src, temp2ASoper[ptr->u.TEMP]);
                 }
-                default:{
-                    list<AS_operand**> as_list = get_all_AS_operand(stm);
-                    for(auto as : as_list){
-                        AS_operand *oper = *as;
-                        if(oper->kind==OperandKind::TEMP && oper->u.TEMP->type==TempType::INT_TEMP && loadTemp2ASOper.find(oper->u.TEMP)!=loadTemp2ASOper.end()){
-                            *as = loadTemp2ASOper[oper->u.TEMP];
-                        }
+                break;
+            }
+            case L_StmKind::T_LOAD:
+            {
+                AS_operand *dst = stm->u.LOAD->dst;
+                AS_operand *ptr = stm->u.LOAD->ptr;
+                if (ptr->kind == OperandKind::TEMP && ptr->u.TEMP->type == TempType::INT_PTR && ptr->u.TEMP->len == 0 && (temp2ASoper.find(ptr->u.TEMP) != temp2ASoper.end()))
+                {
+                    if (dst->kind == OperandKind::TEMP)
+                    {
+                        loadTemp2ASOper[dst->u.TEMP] = temp2ASoper[ptr->u.TEMP];
+                        auto old_it = it;
+                        it++;
+                        block->instrs.erase(old_it);
+                        continue;
                     }
-                    break;
+                    else
+                    {
+                        assert(0);
+                    }
                 }
+                break;
+            }
+            default:
+            {
+                list<AS_operand **> as_list = get_all_AS_operand(stm);
+                for (auto as : as_list)
+                {
+                    AS_operand *oper = *as;
+                    if (oper->kind == OperandKind::TEMP && oper->u.TEMP->type == TempType::INT_TEMP && loadTemp2ASOper.find(oper->u.TEMP) != loadTemp2ASOper.end())
+                    {
+                        *as = loadTemp2ASOper[oper->u.TEMP];
+                    }
+                }
+                break;
+            }
             }
 
             it++;
         }
     }
-
 }
 
 /**
  * @note 计算支配节点
-*/
+ */
 void Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
 {
-    unordered_set<L_block*> blocks = unordered_set<L_block*>();
+    unordered_set<L_block *> blocks = unordered_set<L_block *>();
 
     // 统计所有的block
-    map<int, Node<L_block*>*> &nodes = bg.mynodes;
-    for(auto pair:nodes){
-        Node<L_block*>* node = pair.second;
-        if(node==nullptr || node->nodeInfo()==nullptr){
+    map<int, Node<L_block *> *> &nodes = bg.mynodes;
+    for (auto pair : nodes)
+    {
+        Node<L_block *> *node = pair.second;
+        if (node == nullptr || node->nodeInfo() == nullptr)
+        {
             assert(0);
         }
         blocks.emplace(node->nodeInfo());
     }
 
     // 初始化
-    //对于非根节点：将其支配集合初始设置为所有基本块，即 blocks
-    for(auto pair : nodes){
-        Node<L_block*>* node = pair.second;
-        dominators[node->nodeInfo()] = unordered_set<L_block*>(blocks.begin(), blocks.end());
+    // 对于非根节点：将其支配集合初始设置为所有基本块，即 blocks
+    for (auto pair : nodes)
+    {
+        Node<L_block *> *node = pair.second;
+        dominators[node->nodeInfo()] = unordered_set<L_block *>(blocks.begin(), blocks.end());
     }
-    //对于根节点（入口节点 nodes[0]）：支配集合仅包含自身
-    unordered_set<L_block*> root_block_dominators = unordered_set<L_block*>();
+    // 对于根节点（入口节点 nodes[0]）：支配集合仅包含自身
+    unordered_set<L_block *> root_block_dominators = unordered_set<L_block *>();
     root_block_dominators.emplace(nodes[0]->nodeInfo());
     dominators[nodes[0]->nodeInfo()] = root_block_dominators;
 
     // 迭代
     bool changed = true;
-    while(changed){
+    while (changed)
+    {
         changed = false;
-        for(auto pair : nodes){
-            Node<L_block*>* node = pair.second;
-            unordered_set<L_block*> node_dominators = dominators[node->nodeInfo()];
+        for (auto pair : nodes)
+        {
+            Node<L_block *> *node = pair.second;
+            unordered_set<L_block *> node_dominators = dominators[node->nodeInfo()];
             int origin_size = node_dominators.size();
-            NodeSet* preds = node->pred();
+            NodeSet *preds = node->pred();
 
-            for(auto pred_id:*preds){
-                Node<L_block*>* pred = bg.mynodes[pred_id];
-                if(origin_size>0){
+            for (auto pred_id : *preds)
+            {
+                Node<L_block *> *pred = bg.mynodes[pred_id];
+                if (origin_size > 0)
+                {
                     node_dominators = make_intersection(node_dominators, dominators[pred->nodeInfo()]);
                 }
-            }   
+            }
             // 更新
-            if(node_dominators.size()!=origin_size){
+            if (node_dominators.size() != origin_size)
+            {
                 changed = true;
                 dominators[node->nodeInfo()] = node_dominators;
             }
@@ -384,26 +406,33 @@ void printf_DF()
 void tree_Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
 {
     //   Todo
-     for(auto pair:dominators){
-        L_block* block = pair.first;
-        unordered_set<L_block*> block_dominators = pair.second;
-        for(L_block* dominator:block_dominators){
-            if(dominator==block){
+    for (auto pair : dominators)
+    {
+        L_block *block = pair.first;
+        unordered_set<L_block *> block_dominators = pair.second;
+        for (L_block *dominator : block_dominators)
+        {
+            if (dominator == block)
+            {
                 continue;
             }
             // 判断是否是其他必经节点的必经节点
             bool isIdom = true;
-            for(L_block* other_dominator:block_dominators){
-                if(other_dominator==block || other_dominator==dominator){
+            for (L_block *other_dominator : block_dominators)
+            {
+                if (other_dominator == block || other_dominator == dominator)
+                {
                     continue;
                 }
-                //如果找到了，说明不是idom，下一个
-                if(dominators[other_dominator].find(dominator)!=dominators[other_dominator].end()){
+                // 如果找到了，说明不是idom，下一个
+                if (dominators[other_dominator].find(dominator) != dominators[other_dominator].end())
+                {
                     isIdom = false;
                     break;
                 }
             }
-            if(isIdom){
+            if (isIdom)
+            {
                 // 其实就是一颗树中的节点
                 imm_Dominator idom = imm_Dominator();
                 idom.pred = dominator;
@@ -418,11 +447,13 @@ void tree_Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
     tree_dominators[bg.mynodes[0]->nodeInfo()] = root_idom;
 
     // 写入succ,完成树的创建
-    for(auto pair:tree_dominators){
-        L_block* block = pair.first;
+    for (auto pair : tree_dominators)
+    {
+        L_block *block = pair.first;
         imm_Dominator idom = tree_dominators[block];
-        
-        if(idom.pred!=nullptr){
+
+        if (idom.pred != nullptr)
+        {
             tree_dominators[idom.pred].succs.emplace(block);
         }
     }
@@ -431,27 +462,33 @@ void tree_Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
 void computeDF(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block *> *r)
 {
     //   Todo
-    unordered_set<L_block*> s= unordered_set<L_block*>();
+    unordered_set<L_block *> s = unordered_set<L_block *>();
 
-    for(int succ_id:*r->succ()){
-        Node<L_block*>* node = bg.mynodes[succ_id];
+    for (int succ_id : *r->succ())
+    {
+        Node<L_block *> *node = bg.mynodes[succ_id];
         imm_Dominator idom = tree_dominators[node->nodeInfo()];
-        if(idom.pred != r->nodeInfo()){
+        if (idom.pred != r->nodeInfo())
+        {
             s.emplace(node->nodeInfo());
         }
     }
 
     imm_Dominator idom = tree_dominators[r->nodeInfo()];
-    for(L_block* succ:idom.succs){
+    for (L_block *succ : idom.succs)
+    {
         int succ_id = bg.findNode(succ);
-        if(succ_id==-1){
+        if (succ_id == -1)
+        {
             assert(0);
         }
         computeDF(bg, bg.mynodes[succ_id]);
 
-        unordered_set<L_block*> c_df_array = DF_array[succ];
-        for(L_block* c_df:c_df_array){
-            if(dominators[c_df].find(r->nodeInfo())==dominators[c_df].end() || r->nodeInfo()==c_df){
+        unordered_set<L_block *> c_df_array = DF_array[succ];
+        for (L_block *c_df : c_df_array)
+        {
+            if (dominators[c_df].find(r->nodeInfo()) == dominators[c_df].end() || r->nodeInfo() == c_df)
+            {
                 s.emplace(c_df);
             }
         }
@@ -463,71 +500,67 @@ void computeDF(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block 
 // 只对标量做
 void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
 {
-     // 创建block -> index的映射
-    unordered_map<L_block*, int> block2index;
-    for (int i = 0; i < bg.nodecount; i++){
-        // if (!bg.mynodes[i]){
-        //     continue;
-        // }
-        block2index[bg.mynodes[i]->info] = i;
-    }
-    
-    //step 1
-    unordered_map<Temp_temp*, unordered_set<L_block*>> def_sites;
+    unordered_map<Temp_temp*, unordered_set<L_block*>> defsites;
+    unordered_map<L_block*, unordered_set<Temp_temp*>> A_phi;
+
+      //step 1
     for (int i = 0; i < bg.nodecount; i++){
         if (!bg.mynodes[i]){
             continue;
         }
         unordered_set<L_block*> def_site;
         for(auto& def_a: FG_def(bg.mynodes[i])){
-            if (def_sites.find(def_a) == def_sites.end()){
-                def_sites[def_a] = def_site;
+            if (defsites.find(def_a) == defsites.end()){
+                defsites[def_a] = def_site;
             }
-            if (def_sites[def_a].find(bg.mynodes[i]->info) == def_site.end()){
-                def_sites[def_a].emplace(bg.mynodes[i]->info);
+            if (defsites[def_a].find(bg.mynodes[i]->info) == def_site.end()){
+                defsites[def_a].emplace(bg.mynodes[i]->info);
             }
         }
     }
 
+    // 插入phi语句
+    for(auto pair:defsites){
+        Temp_temp* a = pair.first;
+        unordered_set<L_block*> w = pair.second;
+        while(!w.empty()){
+            L_block* n =*w.begin();
+            w.erase(n);
+            unordered_set<L_block*> df_array = DF_array[n];
 
-    for (auto& temp_pair: def_sites){
-        unordered_set<L_block*> w = temp_pair.second;
-        //phi函数变量集合
-        unordered_set<L_block*> f;
-        while (!w.empty()){
-            //从w删除某个节点n
-            L_block* x = *w.begin();
-            w.erase(x);
-            unordered_set<L_block*> df_x = DF_array[x];
-            
-            for(auto& y: df_x){
-                int node_index = block2index[y];
-                TempSet_ y_in = FG_In(bg.mynodes[node_index]);
-                if (f.find(y) == f.end() && y_in.find(temp_pair.first)!= y_in.end()){
-                    // add phi
-                    int y_index = block2index[y];
-                    AS_operand* dst = AS_Operand_Temp(temp_pair.first);
-                    std::vector<std::pair<AS_operand*,Temp_label*>> phis;
-                    std::pair<AS_operand*,Temp_label*> new_phi_src;
-                    
-                    for(auto& pred: bg.mynodes[y_index]->preds){
-                        new_phi_src = make_pair(dst, bg.mynodes[pred]->info->label);
-                        phis.push_back(new_phi_src);
+            for(L_block* y:df_array){
+                if(A_phi[y].find(a)==A_phi[y].end()){
+                    //找到block y
+                    int node_id = bg.findNode(y);
+                    Node<L_block*>* y_node = bg.mynodes[node_id];
+                    //新建操作数
+                    AS_operand* dst = AS_Operand_Temp(pair.first);
+                    std::vector<std::pair<AS_operand*, Temp_label*>> phis;
+
+                    for(int pred_id:*y_node->pred()){
+                        Node<L_block*>* pred = bg.mynodes[pred_id];
+                        phis.push_back({dst, pred->nodeInfo()->label});
                     }
-                    auto it = y->instrs.begin();
-                    it++;
-                    y->instrs.insert(it, L_Phi(dst, phis));
+                    //避开label插入phi
+                    L_stm* first_stm = y->instrs.front();
+                    if(first_stm->type==L_StmKind::T_LABEL){
+                        y->instrs.pop_front();
+                    }
+                    y->instrs.push_front(L_Phi(dst, phis));
+                    if(first_stm->type==L_StmKind::T_LABEL){
+                        y->instrs.push_front(first_stm);
+                    }
 
-                    //f and w update
-                    f.emplace(y);
-                    if (w.find(y) == w.end()){
+                    A_phi[y].emplace(a);
+                    auto A_orig_y=FG_def(y_node);
+                    if(A_orig_y.find(a)==A_orig_y.end()){
                         w.emplace(y);
                     }
                 }
             }
         }
     }
-    //std::cout<<"place phi finished"<<std::endl;
+    std::cout << "place phi finished" << std::endl;
 }
 
 static list<AS_operand **> get_def_int_operand(LLVMIR::L_stm *stm)
@@ -558,65 +591,114 @@ static list<AS_operand **> get_use_int_operand(LLVMIR::L_stm *stm)
 
 static void Rename_temp(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block *> *n, unordered_map<Temp_temp *, stack<Temp_temp *>> &Stack)
 {
-    //   Todo
-     for(L_stm* stm : n->nodeInfo()->instrs){
-        if(stm->type!=L_StmKind::T_PHI){
-            list<AS_operand**> used_operands = get_use_int_operand(stm);
-            for(AS_operand** used_operand : used_operands){
-                if(Stack.find((*used_operand)->u.TEMP)!=Stack.end()){
-                    *used_operand = AS_Operand_Temp(Stack[(*used_operand)->u.TEMP].top());
+    // 处理前保留原def的temp
+    unordered_map<Temp_temp *, int> origin_def_times;
+    // 语句处理;
+    for (auto &stm : n->info->instrs)
+    { 
+        
+        if (stm->type != L_StmKind::T_PHI)
+        {
+            for (auto use_operand : get_use_int_operand(stm))
+            {
+                if (Stack.find((*use_operand)->u.TEMP) != Stack.end())
+                {
+                    *use_operand = AS_Operand_Temp(Stack[(*use_operand)->u.TEMP].top());
+                }
+                else
+                {
+                    cout << "use_operand_not_find" << endl;
+
+                    assert(0);
                 }
             }
         }
+        // 处理def
+        auto def_operands = get_def_int_operand(stm);
+        
+        if (!def_operands.empty())
+        {   
+            for (auto def_operand :def_operands)
+            {
+                if (Stack.find((*def_operand)->u.TEMP) != Stack.end())
+                {
 
-        list<AS_operand**> def_operands = get_def_int_operand(stm);
-        for(AS_operand** def_operand : def_operands){
-            if(Stack.find((*def_operand)->u.TEMP)!=Stack.end()){
-                Temp_temp* new_temp = Temp_newtemp_int();
-                Stack[(*def_operand)->u.TEMP].push(new_temp);
-                *def_operand = AS_Operand_Temp(new_temp);
+                    Temp_temp *new_temp = Temp_newtemp_int();
+                    Stack[(*def_operand)->u.TEMP].push(new_temp);
+
+                    if (origin_def_times.find((*def_operand)->u.TEMP) == origin_def_times.end())
+                    {
+                        origin_def_times[(*def_operand)->u.TEMP] = 1;
+                    }
+                    else
+                    {
+                        origin_def_times[(*def_operand)->u.TEMP] += 1;
+                    }
+                    *def_operand = AS_Operand_Temp(new_temp);
+                }
+                else
+                    assert(0);
             }
         }
     }
 
 
-    for(int succ_id : *n->succ()){
-        Node<L_block*>* succ = bg.mynodes[succ_id];
+    /*
+    ofstream out;
+    out.open("./tests/block/"+n->info->label->name + ".ll");
+    printL_block(out,n->info);
+    out.close();
+    */
 
-        // 记录n是succ的第几个前驱
-        int loc = 0;
-        for(int pred_id:*succ->pred()){
-            Node<L_block*>* pred = bg.mynodes[pred_id];
-            if(n==pred)
+    // 后继处理
+    for (auto &succ : n->succs)
+    {
+        int j = 0; // n是succ的第j个前驱
+        for (auto &pred : bg.mynodes[succ]->preds)
+        {
+            if (n->mykey == pred)
                 break;
-            
-            loc++;
+            j++;
         }
 
-        for(L_stm* stm : succ->nodeInfo()->instrs){
-            if(stm->type==L_StmKind::T_PHI){
-                Temp_temp* old_temp = stm->u.PHI->phis[loc].first->u.TEMP;
-                stm->u.PHI->phis[loc].first = AS_Operand_Temp(Stack[old_temp].top());
+        for (auto &stm : bg.mynodes[succ]->info->instrs)
+        {
+            if (stm->type == L_StmKind::T_PHI)
+            {
+                if (stm->u.PHI->phis[j].second == n->info->label)
+                {
+                    stm->u.PHI->phis[j] = make_pair(AS_Operand_Temp(Stack[stm->u.PHI->phis[j].first->u.TEMP].top()), n->info->label);
+                }
             }
         }
     }
 
-    imm_Dominator idom = tree_dominators[n->nodeInfo()];
-    for(L_block* succ:idom.succs){
-        int node_id = bg.findNode(succ);
-        Rename_temp(bg, bg.mynodes[node_id], Stack);
+    std::cout<<"succ finished"<<std::endl;
+
+    // 处理子节点
+    for (auto &son : tree_dominators[n->info].succs)
+    {
+        int son_index = bg.findNode(son);
+        Rename_temp(bg, bg.mynodes[son_index], Stack);
+    }
+
+    // pop出这个block压入的v
+    for (auto temp_pair : origin_def_times)
+    {
+        for (int i = 0; i < temp_pair.second; i++)
+        {
+            Stack[temp_pair.first].pop();
+        }
     }
 }
-
 void Rename(GRAPH::Graph<LLVMIR::L_block *> &bg)
-{    // 初始化
-    unordered_map<Temp_temp*, stack<Temp_temp*>> stack;
+{
+   unordered_map<Temp_temp*, stack<Temp_temp*>> stack;
     for(auto pair:temp2ASoper){
         stack[pair.second->u.TEMP].push(pair.second->u.TEMP);
     }
-
     Rename_temp(bg, bg.mynodes[0], stack);
-    //   Todo
+    std::cout << "rename finish" << std::endl;
 }
 
 template <typename T>
