@@ -358,35 +358,57 @@ TempSet_ &FG_use(GRAPH::Node<LLVMIR::L_block *> *r)
     return UseDefTable[r].use;
 }
 
+/**
+ * @note 使用深度优先搜索从根节点遍历所有的节点，将从根节点可达的节点颜色设置为color
+*/
+static void DFS(Node<L_block*>* r, Graph<L_block*>& bg, int color) {
+    if(r->color == color)
+        return;
+
+    r->color = color;
+    for(auto &succ_id: *r->succ()){
+        DFS(bg.mynodes[succ_id], bg, color);
+    }
+}
+
 static void Use_def(GRAPH::Node<LLVMIR::L_block *> *r, GRAPH::Graph<LLVMIR::L_block *> &bg, std::vector<Temp_temp *> &args)
 {
-    // 先操作入口，将args都放入入口
+   if(r->color==1){
+        return;
+    }
 
-    for (int i = 0; i < bg.nodecount; i++)
-    {
-        useDef b_use_def;
-        TempSet_ b_def;
-        TempSet_ b_use;
-        for (auto &stm : bg.mynodes[i]->nodeInfo()->instrs)
-        {
-            // 分别获取def和use的temp
-            list<Temp_temp *> b_stm_def = get_def(stm);
-            list<Temp_temp *> b_stm_use = get_use(stm);
-            for (auto &def_temp : b_stm_def)
-            {
-                if (b_def.find(def_temp) == b_def.end())
-                    b_def.emplace(def_temp);
-                
-            }
-            for (auto &use_temp : b_stm_use)
-            {
-                if (b_use.find(use_temp) == b_use.end())
-                    b_use.emplace(use_temp);           
-            }
+    list<L_stm*> stms = r->nodeInfo()->instrs;
+    useDef block_use_def = UseDefTable[r];
+    for(L_stm* stm:stms){
+        // 先处理use
+        list<Temp_temp*> used_temps = get_use(stm);
+        for(Temp_temp* used_temp:used_temps){
+            if(block_use_def.def.find(used_temp)!=block_use_def.def.end())
+                continue;
+            block_use_def.use.emplace(used_temp);
         }
-        b_use_def.def = b_def;
-        b_use_def.use = b_use;
-        UseDefTable[bg.mynodes[i]] = b_use_def;
+
+        // 再处理def
+        list<Temp_temp*> def_temps = get_def(stm);
+        for(Temp_temp* def_temp:def_temps){
+            if(block_use_def.use.find(def_temp)!=block_use_def.use.end())
+                continue;
+            block_use_def.def.emplace(def_temp);
+        }
+    }
+
+    UseDefTable[r] = block_use_def;
+    r->color = 1;
+
+    // 处理后继块
+    // TODO
+    for(int succ_id:*r->succ()){
+        Use_def(bg.mynodes[succ_id], bg, args);
+    }
+
+    if(r->mykey==0){
+        // root节点
+        DFS(r, bg, 0);
     }
 }
 

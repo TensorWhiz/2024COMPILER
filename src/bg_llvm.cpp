@@ -104,11 +104,6 @@ void SingleSourceGraph(Node<L_block *> *r, Graph<L_block *> &bg, L_func *fun)
 
         for(auto &pair : bg.mynodes){
             Node<L_block*>* node = pair.second;
-
-            if(node==nullptr || node->info==nullptr){
-                assert(0);
-            }
-
             if(node->color == default_color){
                 // 删除入边
                 while(true){
@@ -136,7 +131,7 @@ void SingleSourceGraph(Node<L_block *> *r, Graph<L_block *> &bg, L_func *fun)
                 bg.rmNode(node);
             }
         }
-
+        //恢复颜色
         DFS(r, bg, default_color);
 }
 

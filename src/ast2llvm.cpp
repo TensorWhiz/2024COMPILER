@@ -615,8 +615,8 @@ Func_local *ast2llvmFunc(aA_fnDef f)
     for (auto &stmt : f->stmts)
     {
         ast2llvmBlock(stmt, nullptr, nullptr);
-        if (stmt->kind == A_codeBlockStmtType::A_returnStmtKind)
-            break;
+        // if (stmt->kind == A_codeBlockStmtType::A_returnStmtKind)
+        //     break;
     }
 
     // 如果最后没有返回语句，函数会依据返回类型生成默认返回。
@@ -798,19 +798,6 @@ void ast2llvmStmtassign(aA_assignStmt s)
 
 void ast2llvmStmtcall(aA_callStmt s)
 {
-    // string funcName = *s->fnCall->fn;
-    // vector<AS_operand *> args;
-    // for (const auto &val : s->fnCall->vals)
-    // {
-    //     args.push_back(ast2llvmRightVal(val));
-    // }
-    // if (funcReturnMap.find(funcName) != funcReturnMap.end())
-    // {
-
-    //     emit_irs.push_back(L_Voidcall(funcName, args));
-    // }
-    // else
-    //     assert(0);
     ast2llvmfnCall(s->fnCall);
 }
 

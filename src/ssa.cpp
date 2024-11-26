@@ -542,14 +542,10 @@ void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
                         phis.push_back({dst, pred->nodeInfo()->label});
                     }
                     //避开label插入phi
-                    L_stm* first_stm = y->instrs.front();
-                    if(first_stm->type==L_StmKind::T_LABEL){
-                        y->instrs.pop_front();
-                    }
-                    y->instrs.push_front(L_Phi(dst, phis));
-                    if(first_stm->type==L_StmKind::T_LABEL){
-                        y->instrs.push_front(first_stm);
-                    }
+                    auto it = y->instrs.begin();
+                    it++;
+                    y->instrs.insert(it, L_Phi(dst, phis));
+
 
                     A_phi[y].emplace(a);
                     auto A_orig_y=FG_def(y_node);
@@ -560,7 +556,6 @@ void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
             }
         }
     }
-    std::cout << "place phi finished" << std::endl;
 }
 
 static list<AS_operand **> get_def_int_operand(LLVMIR::L_stm *stm)
@@ -568,7 +563,7 @@ static list<AS_operand **> get_def_int_operand(LLVMIR::L_stm *stm)
     list<AS_operand **> ret1 = get_def_operand(stm), ret2;
     for (auto AS_op : ret1)
     {
-        if ((**AS_op).u.TEMP->type == TempType::INT_TEMP)
+        if ((**AS_op).kind==OperandKind::TEMP && (**AS_op).u.TEMP->type == TempType::INT_TEMP)
         {
             ret2.push_back(AS_op);
         }
@@ -581,7 +576,7 @@ static list<AS_operand **> get_use_int_operand(LLVMIR::L_stm *stm)
     list<AS_operand **> ret1 = get_use_operand(stm), ret2;
     for (auto AS_op : ret1)
     {
-        if ((**AS_op).u.TEMP->type == TempType::INT_TEMP)
+        if ((**AS_op).kind==OperandKind::TEMP && (**AS_op).u.TEMP->type == TempType::INT_TEMP)
         {
             ret2.push_back(AS_op);
         }
