@@ -708,9 +708,6 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
             else if (varDeclScalar->type->type == A_dataType::A_nativeTypeKind)
             {
                 Temp_temp *temp = Temp_newtemp_int_ptr(0);
-                // if (localVarMap.find(id) != localVarMap.end())
-                //         localVarMap[id] = var;
-                //     else
                 localVarMap.emplace(*varDeclScalar->id, temp);
                 emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
                 ;
@@ -809,7 +806,7 @@ void ast2llvmStmtcall(aA_callStmt s)
     // }
     // if (funcReturnMap.find(funcName) != funcReturnMap.end())
     // {
-        
+
     //     emit_irs.push_back(L_Voidcall(funcName, args));
     // }
     // else
