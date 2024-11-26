@@ -14,6 +14,31 @@ static unordered_map<string, Name_name *> globalVarMap;
 static unordered_map<string, Temp_temp *> localVarMap;
 static list<L_stm *> emit_irs;
 
+void def_sys_call(vector<L_def *> &defs)
+{
+    defs.push_back(L_Funcdecl("getch", vector<TempDef>(), FuncType(ReturnType::INT_TYPE)));
+    defs.push_back(L_Funcdecl("getint", vector<TempDef>(), FuncType(ReturnType::INT_TYPE)));
+    defs.push_back(L_Funcdecl("putch", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    defs.push_back(L_Funcdecl("putint", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    defs.push_back(L_Funcdecl("putarray", vector<TempDef>{TempDef(TempType::INT_TEMP), TempDef(TempType::INT_PTR, -1)}, FuncType(ReturnType::VOID_TYPE)));
+    defs.push_back(L_Funcdecl("_sysy_starttime", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    defs.push_back(L_Funcdecl("_sysy_stoptime", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    funcReturnMap.emplace("getch", FuncType(ReturnType::INT_TYPE));
+    funcReturnMap.emplace("getint", FuncType(ReturnType::INT_TYPE));
+    funcReturnMap.emplace("putch", FuncType(ReturnType::VOID_TYPE));
+    funcReturnMap.emplace("putint", FuncType(ReturnType::VOID_TYPE));
+    funcReturnMap.emplace("putarray", FuncType(ReturnType::VOID_TYPE));
+    funcReturnMap.emplace("_sysy_starttime", FuncType(ReturnType::VOID_TYPE));
+    funcReturnMap.emplace("_sysy_stoptime", FuncType(ReturnType::VOID_TYPE));
+    // funcParamsMap.emplace("getch", new L_funcdecl("getch", vector<TempDef>(), FuncType(ReturnType::INT_TYPE)));
+    // funcParamsMap.emplace("getint", new L_funcdecl("getint", vector<TempDef>(), FuncType(ReturnType::INT_TYPE)));
+    // funcParamsMap.emplace("putch", new L_funcdecl("putch", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    // funcParamsMap.emplace("putint", new L_funcdecl("putint", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    // funcParamsMap.emplace("putarray", new L_funcdecl("putarray", vector<TempDef>{TempDef(TempType::INT_TEMP), TempDef(TempType::INT_PTR, -1)}, FuncType(ReturnType::VOID_TYPE)));
+    // funcParamsMap.emplace("_sysy_starttime", new L_funcdecl("_sysy_starttime", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+    // funcParamsMap.emplace("_sysy_stoptime", new L_funcdecl("_sysy_stoptime", vector<TempDef>{TempDef(TempType::INT_TEMP)}, FuncType(ReturnType::VOID_TYPE)));
+}
+
 LLVMIR::L_prog *ast2llvm(aA_program p)
 {
     auto defs = ast2llvmProg_first(p);
@@ -250,6 +275,7 @@ int ast2llvmExprUnit_first(aA_exprUnit e)
 std::vector<LLVMIR::L_def *> ast2llvmProg_first(aA_program p)
 {
     vector<L_def *> defs;
+    def_sys_call(defs);
     for (const auto &v : p->programElements)
     {
         switch (v->kind)
@@ -585,8 +611,6 @@ Func_local *ast2llvmFunc(aA_fnDef f)
             assert(0);
     }
 
-
-
     // 处理函数体的语句块
     for (auto &stmt : f->stmts)
     {
@@ -777,35 +801,51 @@ void ast2llvmStmtassign(aA_assignStmt s)
 
 void ast2llvmStmtcall(aA_callStmt s)
 {
-        string funcName = *s->fnCall->fn;
-        vector<AS_operand *> args;
-        for (const auto &val : s->fnCall->vals)
-        {
-            args.push_back(ast2llvmRightVal(val));
-        }
-        if (funcReturnMap.find(funcName) != funcReturnMap.end())
-        {
-            emit_irs.push_back(L_Voidcall(funcName, args));
-        }
-        else
-            assert(0);
+    // string funcName = *s->fnCall->fn;
+    // vector<AS_operand *> args;
+    // for (const auto &val : s->fnCall->vals)
+    // {
+    //     args.push_back(ast2llvmRightVal(val));
+    // }
+    // if (funcReturnMap.find(funcName) != funcReturnMap.end())
+    // {
+        
+    //     emit_irs.push_back(L_Voidcall(funcName, args));
+    // }
+    // else
+    //     assert(0);
+    ast2llvmfnCall(s->fnCall);
 }
 
 AS_operand *ast2llvmfnCall(aA_fnCall callExpr)
 {
+    string funcName = *callExpr->fn;
+    vector<AS_operand *> args;
+    for (auto val : callExpr->vals)
+    {
+        args.push_back(ast2llvmRightVal(val));
+    }
+
     if (funcReturnMap.find(*callExpr->fn) != funcReturnMap.end())
+    {
+        AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
+        string name = *callExpr->fn;
+        FuncType funcType = funcReturnMap[name];
+        if (funcType.type == ReturnType::VOID_TYPE)
         {
-            AS_operand *res = AS_Operand_Temp(Temp_newtemp_int());
-            vector<AS_operand *> args;
-            for (auto val : callExpr->vals)
-            {
-                args.push_back(ast2llvmRightVal(val));
-            }
-            emit_irs.push_back(L_Call(*callExpr->fn, res, args));
+            emit_irs.push_back(L_Voidcall(name, args));
+            return res;
+        }
+        else if (funcType.type == ReturnType::INT_TYPE)
+        {
+            emit_irs.push_back(L_Call(name, res, args));
             return res;
         }
         else
             assert(0);
+    }
+    else
+        assert(0);
 }
 
 void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label)
@@ -1069,7 +1109,8 @@ AS_operand *ast2llvmId_1(string id)
             gep(res, temp, index);
             return res;
         }
-        else if(localVarMap[id]->type == TempType::STRUCT_PTR){
+        else if (localVarMap[id]->type == TempType::STRUCT_PTR)
+        {
             AS_operand *res = AS_Operand_Temp(Temp_newtemp_struct_ptr(-1, move(temp->u.TEMP->structname)));
             AS_operand *index = AS_Operand_Const(0);
             gep(res, temp, index);
@@ -1094,7 +1135,8 @@ AS_operand *ast2llvmId_1(string id)
             gep(res, temp, index);
             return res;
         }
-        else if(globalVarMap[id]->type == TempType::STRUCT_PTR ){
+        else if (globalVarMap[id]->type == TempType::STRUCT_PTR)
+        {
             AS_operand *res = AS_Operand_Temp(Temp_newtemp_struct_ptr(-1, move(temp->u.TEMP->structname)));
             AS_operand *index = AS_Operand_Const(0);
             gep(res, temp, index);
