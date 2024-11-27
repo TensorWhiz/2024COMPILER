@@ -1,9 +1,9 @@
 #include "liveness.h"
-#include <unordered_map>
+#include <unordered_map>``
 #include <unordered_set>
 #include "graph.hpp"
 #include "llvm_ir.h"
-#include "temp.h"
+#include "temp.h"`
 
 using namespace std;
 using namespace LLVMIR;
@@ -129,87 +129,65 @@ list<AS_operand **> get_all_AS_operand(L_stm *stm)
 
 std::list<AS_operand **> get_def_operand(L_stm *stm)
 {
-    //   Todo
-    std::list<AS_operand **> operand_list;
-
+    list<AS_operand **> AS_operand_list;
     switch (stm->type)
     {
     case L_StmKind::T_BINOP:
     {
-        operand_list.push_back(&(stm->u.BINOP->dst));
-        break;
+        if (stm->u.BINOP->dst->kind == OperandKind::TEMP && stm->u.BINOP->dst->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.BINOP->dst));
+        }
     }
-    case L_StmKind::T_LOAD:
-    {
-        operand_list.push_back(&(stm->u.LOAD->dst));
-        break;
-    }
-    case L_StmKind::T_STORE:
-    {
-        break;
-    }
-    case L_StmKind::T_LABEL:
-    {
-        break;
-    }
-    case L_StmKind::T_JUMP:
-    {
-        break;
-    }
+    break;
     case L_StmKind::T_CMP:
     {
-        operand_list.push_back(&(stm->u.CMP->dst));
-        break;
+        if (stm->u.CMP->dst->kind == OperandKind::TEMP && stm->u.CMP->dst->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.CMP->dst));
+        }
     }
-    case L_StmKind::T_CJUMP:
-    {
-        break;
-    }
+    break;
     case L_StmKind::T_MOVE:
     {
-        operand_list.push_back(&(stm->u.MOVE->dst));
-        break;
+        if (stm->u.MOVE->dst->kind == OperandKind::TEMP && stm->u.MOVE->dst->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.MOVE->dst));
+        }
     }
+    break;
     case L_StmKind::T_CALL:
     {
-        // TODO 是否记录函数返回值写入的寄存器
-        break;
+        if (stm->u.CALL->res->kind == OperandKind::TEMP && stm->u.CALL->res->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.CALL->res));
+        }
     }
-    case L_StmKind::T_VOID_CALL:
-    {
-        break;
-    }
-    case L_StmKind::T_RETURN:
-    {
-        break;
-    }
+    break;
     case L_StmKind::T_PHI:
     {
-        operand_list.push_back(&(stm->u.PHI->dst));
-        break;
+        if (stm->u.PHI->dst->kind == OperandKind::TEMP && stm->u.PHI->dst->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.PHI->dst));
+        }
     }
-    case L_StmKind::T_NULL:
-    {
-        break;
-    }
-    case L_StmKind::T_ALLOCA:
-    {
-        operand_list.push_back(&(stm->u.ALLOCA->dst));
-        break;
-    }
+    break;
     case L_StmKind::T_GEP:
     {
-        operand_list.push_back(&(stm->u.GEP->new_ptr));
-        break;
+        if (stm->u.GEP->new_ptr->kind == OperandKind::TEMP && stm->u.GEP->new_ptr->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.GEP->new_ptr));
+        }
     }
+    break;
     default:
     {
-        break;
     }
+    break;
     }
-
-    return operand_list;
+    return AS_operand_list;
 }
+
 list<Temp_temp *> get_def(L_stm *stm)
 {
     auto AS_operand_list = get_def_operand(stm);
@@ -223,105 +201,115 @@ list<Temp_temp *> get_def(L_stm *stm)
 
 std::list<AS_operand **> get_use_operand(L_stm *stm)
 {
-    //   Todo
-    std::list<AS_operand **> operand_list;
-
+    list<AS_operand **> AS_operand_list;
     switch (stm->type)
     {
     case L_StmKind::T_BINOP:
     {
-        operand_list.push_back(&(stm->u.BINOP->left));
-        operand_list.push_back(&(stm->u.BINOP->right));
-        break;
+        if (stm->u.BINOP->left->kind == OperandKind::TEMP && stm->u.BINOP->left->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.BINOP->left));
+        }
+        if (stm->u.BINOP->right->kind == OperandKind::TEMP && stm->u.BINOP->right->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.BINOP->right));
+        }
     }
-    case L_StmKind::T_LOAD:
-    {
-        operand_list.push_back(&(stm->u.LOAD->ptr));
-        break;
-    }
-    case L_StmKind::T_STORE:
-    {
-        operand_list.push_back(&(stm->u.STORE->src));
-        // TODO 是否需要
-        // operand_list.push_back(&(stm->u.STORE->ptr));
-        break;
-    }
-    case L_StmKind::T_LABEL:
-    {
-        break;
-    }
-    case L_StmKind::T_JUMP:
-    {
-        break;
-    }
+    break;
     case L_StmKind::T_CMP:
     {
-        operand_list.push_back(&(stm->u.CMP->left));
-        operand_list.push_back(&(stm->u.CMP->right));
-        break;
+        if (stm->u.CMP->left->kind == OperandKind::TEMP && stm->u.CMP->left->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.CMP->left));
+        }
+        if (stm->u.CMP->right->kind == OperandKind::TEMP && stm->u.CMP->right->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.CMP->right));
+        }
     }
+    break;
     case L_StmKind::T_CJUMP:
     {
-        operand_list.push_back(&(stm->u.CJUMP->dst));
-        break;
+        if (stm->u.CJUMP->dst->kind == OperandKind::TEMP && stm->u.CJUMP->dst->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.CJUMP->dst));
+        }
     }
+    break;
     case L_StmKind::T_MOVE:
     {
-        operand_list.push_back(&(stm->u.MOVE->src));
-        break;
+        if (stm->u.MOVE->src->kind == OperandKind::TEMP && stm->u.MOVE->src->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.MOVE->src));
+        }
     }
+    break;
     case L_StmKind::T_CALL:
     {
-        for (int i = 0; i < stm->u.CALL->args.size(); i++)
+        for (auto &arg : stm->u.CALL->args)
         {
-            operand_list.push_back(&(stm->u.CALL->args[i]));
+            if (arg->kind == OperandKind::TEMP && arg->u.TEMP->type == TempType::INT_TEMP)
+            {
+                AS_operand_list.push_back(&arg);
+            }
         }
-        break;
     }
+    break;
     case L_StmKind::T_VOID_CALL:
     {
-        for (int i = 0; i < stm->u.VOID_CALL->args.size(); i++)
+        for (auto &arg : stm->u.VOID_CALL->args)
         {
-            operand_list.push_back(&(stm->u.VOID_CALL->args[i]));
+            if (arg->kind == OperandKind::TEMP && arg->u.TEMP->type == TempType::INT_TEMP)
+            {
+                AS_operand_list.push_back(&arg);
+            }
         }
-        break;
     }
+    break;
     case L_StmKind::T_RETURN:
     {
         if (stm->u.RET->ret != nullptr)
-            operand_list.push_back(&(stm->u.RET->ret));
-        break;
+        {
+            if (stm->u.RET->ret->kind == OperandKind::TEMP && stm->u.RET->ret->u.TEMP->type == TempType::INT_TEMP)
+            {
+                AS_operand_list.push_back(&(stm->u.RET->ret));
+            }
+        }
     }
+    break;
     case L_StmKind::T_PHI:
     {
-        for (int i = 0; i < stm->u.PHI->phis.size(); i++)
+        for (auto &arg : stm->u.PHI->phis)
         {
-            AS_operand *operand = stm->u.PHI->phis[i].first;
-            operand_list.push_back(&(operand));
+            if (arg.first->kind == OperandKind::TEMP && arg.first->u.TEMP->type == TempType::INT_TEMP)
+            {
+                AS_operand_list.push_back(&arg.first);
+            }
         }
-        break;
     }
-    case L_StmKind::T_NULL:
-    {
-        break;
-    }
-    case L_StmKind::T_ALLOCA:
-    {
-        break;
-    }
+    break;
     case L_StmKind::T_GEP:
     {
-        operand_list.push_back(&(stm->u.GEP->base_ptr));
-        operand_list.push_back(&(stm->u.GEP->index));
-        break;
+        if (stm->u.GEP->index->kind == OperandKind::TEMP && stm->u.GEP->index->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.GEP->index));
+        }
     }
+    break;
+    case L_StmKind::T_STORE:
+    {
+        if (stm->u.STORE->src->kind == OperandKind::TEMP && stm->u.STORE->src->u.TEMP->type == TempType::INT_TEMP)
+        {
+            AS_operand_list.push_back(&(stm->u.STORE->src));
+        }
+    }
+    break;
     default:
     {
-        assert(0);
     }
+    break;
     }
-
-    return operand_list;
+    return AS_operand_list;
 }
 
 list<Temp_temp *> get_use(L_stm *stm)
@@ -358,99 +346,118 @@ TempSet_ &FG_use(GRAPH::Node<LLVMIR::L_block *> *r)
     return UseDefTable[r].use;
 }
 
-/**
- * @note 使用深度优先搜索从根节点遍历所有的节点，将从根节点可达的节点颜色设置为color
-*/
-static void DFS(Node<L_block*>* r, Graph<L_block*>& bg, int color) {
-    if(r->color == color)
-        return;
-
-    r->color = color;
-    for(auto &succ_id: *r->succ()){
-        DFS(bg.mynodes[succ_id], bg, color);
-    }
-}
-
 static void Use_def(GRAPH::Node<LLVMIR::L_block *> *r, GRAPH::Graph<LLVMIR::L_block *> &bg, std::vector<Temp_temp *> &args)
 {
-   if(r->color==1){
-        return;
-    }
+    // 先操作入口，将args都放入入口
 
-    list<L_stm*> stms = r->nodeInfo()->instrs;
-    useDef block_use_def = UseDefTable[r];
-    for(L_stm* stm:stms){
-        // 先处理use
-        list<Temp_temp*> used_temps = get_use(stm);
-        for(Temp_temp* used_temp:used_temps){
-            if(block_use_def.def.find(used_temp)!=block_use_def.def.end())
-                continue;
-            block_use_def.use.emplace(used_temp);
+    for (int i = 0; i < bg.nodecount; i++)
+    {
+        useDef b_use_def;
+        TempSet_ b_def; 
+        TempSet_ b_use;
+        if (i == 0)
+        {
+            for (auto &arg : args)
+            {
+                if (arg->type == TempType::INT_TEMP)
+                {
+                    b_def.emplace(arg);
+                }
+            }
         }
 
-        // 再处理def
-        list<Temp_temp*> def_temps = get_def(stm);
-        for(Temp_temp* def_temp:def_temps){
-            if(block_use_def.use.find(def_temp)!=block_use_def.use.end())
-                continue;
-            block_use_def.def.emplace(def_temp);
+        for (auto &stm : bg.mynodes[i]->nodeInfo()->instrs)
+        {
+            list<Temp_temp *> b_stm_def = get_def(stm);
+            list<Temp_temp *> b_stm_use = get_use(stm);
+            for (auto &def_temp : b_stm_def)
+            {
+                if (b_def.find(def_temp) == b_def.end())
+                {
+                    b_def.emplace(def_temp);
+                }
+            }
+            for (auto &use_temp : b_stm_use)
+            {
+                if (b_def.find(use_temp) == b_def.end() && b_use.find(use_temp) == b_use.end())
+                {
+                    b_use.emplace(use_temp);
+                }
+            }
         }
-    }
+        b_use_def.def = b_def;
+        b_use_def.use = b_use;
+        UseDefTable[bg.mynodes[i]] = b_use_def;
 
-    UseDefTable[r] = block_use_def;
-    r->color = 1;
-
-    // 处理后继块
-    // TODO
-    for(int succ_id:*r->succ()){
-        Use_def(bg.mynodes[succ_id], bg, args);
-    }
-
-    if(r->mykey==0){
-        // root节点
-        DFS(r, bg, 0);
+        // 初始化inout table
+        inOut b_in_out;
+        InOutTable[bg.mynodes[i]] = b_in_out;
     }
 }
 
 static int gi = 0;
 static bool LivenessIteration(GRAPH::Node<LLVMIR::L_block *> *r, GRAPH::Graph<LLVMIR::L_block *> &bg)
 {
-    bool ret = false;
 
-    for(auto pair:bg.mynodes){
-        if(pair.second!=nullptr&&pair.second->nodeInfo()!=nullptr){
-            Node<L_block*>* node = pair.second;
-            inOut block_in_out = InOutTable[node];
-            useDef block_use_def = UseDefTable[node];
+    // in[b] = use[b] + (out[b] - def[b])
+    // out[b] = sum(in[s])
+    bool change = false;
+    for (int i = bg.nodecount - 1; i >= 0; i--)
+    {
+        TempSet_ b_in = InOutTable[bg.mynodes[i]].in;
+        TempSet_ b_out = InOutTable[bg.mynodes[i]].out;
+        TempSet_ b_def = UseDefTable[bg.mynodes[i]].def;
+        TempSet_ b_use = UseDefTable[bg.mynodes[i]].use;
 
-            // OUT
-            for(int succ_id:*node->succ()){
-                Node<L_block*>* succ = bg.mynodes[succ_id];
-                TempSet unionSet = TempSet_union(&(block_in_out.out), &(InOutTable[succ].in));
-                block_in_out.out = *unionSet;
-                delete unionSet;
+        // 计算out
+        for (auto &node : bg.mynodes[i]->succs)
+        {
+            TempSet_ succ_in = InOutTable[bg.mynodes[node]].in;
+            for (auto &temp : succ_in)
+            {
+                if (b_out.find(temp) == b_out.end())
+                {
+                    b_out.emplace(temp);
+                }
+            }
+        }
+
+        //计算in
+        for (auto& temp: b_use){
+            if (b_in.find(temp) == b_in.end()){
+                b_in.emplace(temp);
+                change = true;
+            }
+        }
+        for (auto& temp: b_out){
+            if (b_def.find(temp) == b_def.end()){
+                if (b_in.find(temp) == b_in.end()){
+                    b_in.emplace(temp);
+                    change = true;
+                }
             }
 
-            // IN
-            TempSet diffSet = TempSet_diff(&(block_in_out.out), &(block_use_def.def));
-            int original_size = block_in_out.in.size();
-            block_in_out.in = *(TempSet_union(&(block_in_out.in), diffSet));
-            if(block_in_out.in.size()>original_size)
-                ret = true;
-            delete diffSet;
-            
-            InOutTable[node] = block_in_out;
-            UseDefTable[node] = block_use_def;
         }
+        // int original_size = b_in.size();
+        // TempSet diffSet = TempSet_diff(&(b_out), &(b_def));
+        // TempSet newInSet = TempSet_union(&(b_in), diffSet);
+        // b_in = *newInSet;
+        // if (b_in.size() > original_size)
+        //     change = true;
+        //delete diffSet;
+        //delete newInSet;
+
+        InOutTable[bg.mynodes[i]].in = b_in;
+        InOutTable[bg.mynodes[i]].out = b_out;
     }
-    return ret;
+    return change;
 }
 
 void PrintTemps(FILE *out, TempSet set)
 {
     for (auto x : *set)
     {
-        printf("%d  ", x->num);
+        fprintf(out, "%d  ", x->num);
     }
 }
 
@@ -460,7 +467,7 @@ void Show_Liveness(FILE *out, GRAPH::Graph<LLVMIR::L_block *> &bg)
     for (auto block_node : bg.mynodes)
     {
         fprintf(out, "----------------------\n");
-        printf("block %s \n", block_node.second->info->label->name.c_str());
+        fprintf(out, "block %s \n", block_node.second->info->label->name.c_str());
         fprintf(out, "def=\n");
         PrintTemps(out, &FG_def(block_node.second));
         fprintf(out, "\n");
@@ -480,7 +487,6 @@ void Liveness(GRAPH::Node<LLVMIR::L_block *> *r, GRAPH::Graph<LLVMIR::L_block *>
 {
     init_INOUT();
     Use_def(r, bg, args);
-    gi = 0;
     bool changed = true;
     while (changed)
         changed = LivenessIteration(r, bg);

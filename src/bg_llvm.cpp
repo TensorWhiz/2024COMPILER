@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unordered_map>
+#include <iostream>
 #include "graph.hpp"
 #include "printLLVM.h"
 #include "temp.h"
@@ -13,25 +14,20 @@ using namespace std;
 using namespace LLVMIR;
 using namespace GRAPH;
 
-static Graph<L_block *> RA_bg;
-static unordered_map<Temp_label *, L_block *> block_env;
+static Graph<L_block*> RA_bg;
+static unordered_map<Temp_label*, L_block*> block_env;
 
-Graph<L_block *> &Bg_graph()
-{
+Graph<L_block*>& Bg_graph() {
     return RA_bg;
 }
-unordered_map<Temp_label *, L_block *> &Bg_block_env()
-{
+unordered_map<Temp_label*, L_block*>& Bg_block_env() {
     return block_env;
 }
 
-Node<L_block *> *Look_bg(L_block *b)
-{
-    Node<L_block *> *n1 = nullptr;
-    for (auto n : *RA_bg.nodes())
-    {
-        if (n.second->nodeInfo() == b)
-        {
+Node<L_block*>* Look_bg(L_block* b) {
+    Node<L_block*>* n1 = nullptr;
+    for (auto n : *RA_bg.nodes()) {
+        if (n.second->nodeInfo() == b) {
             n1 = n.second;
             break;
         }
@@ -42,10 +38,9 @@ Node<L_block *> *Look_bg(L_block *b)
         return n1;
 }
 
-static void Enter_bg(L_block *b1, L_block *b2)
-{
-    Node<L_block *> *n1 = Look_bg(b1);
-    Node<L_block *> *n2 = Look_bg(b2);
+static void Enter_bg(L_block* b1, L_block* b2) {
+    Node<L_block*>* n1 = Look_bg(b1);
+    Node<L_block*>* n2 = Look_bg(b2);
     RA_bg.addEdge(n1, n2);
     return;
 }
@@ -53,23 +48,18 @@ static void Enter_bg(L_block *b1, L_block *b2)
 /* input LLVMIR::L_block* *List after instruction selection for each block,
     generate a graph on the basic blocks */
 
-Graph<L_block *> &Create_bg(list<L_block *> &bl)
-{
-    RA_bg = Graph<L_block *>();
-    block_env = unordered_map<Temp_label *, L_block *>();
-    // 添加图中的节点
-    for (auto block : bl)
-    {
+Graph<L_block*>& Create_bg(list<L_block*>& bl) {
+    RA_bg = Graph<L_block*>();
+    block_env = unordered_map<Temp_label*, L_block*>();
+
+    for (auto block : bl) {
         block_env.insert({block->label, block});
         RA_bg.addNode(block);
     }
-    // 添加图中的边
-    for (auto block : bl)
-    {
-        // 获取后继块添加边
-        unordered_set<Temp_label *> succs = block->succs;
-        for (auto label : succs)
-        {
+
+    for (auto block : bl) {
+        unordered_set<Temp_label*> succs = block->succs;
+        for (auto label : succs) {
             Enter_bg(block, block_env[label]);
         }
     }
@@ -92,6 +82,7 @@ static void DFS(Node<L_block *> *r, Graph<L_block *> &bg, int color)
  * @note 删除不可达节点
  * @note SSA的要求是起始节点必须唯一，这里直接从src节点遍历图，然后删除未着色的节点即可。
  */
+
 void SingleSourceGraph(Node<L_block *> *r, Graph<L_block *> &bg, L_func *fun)
 {
        // 0
@@ -133,25 +124,27 @@ void SingleSourceGraph(Node<L_block *> *r, Graph<L_block *> &bg, L_func *fun)
         }
         //恢复颜色
         DFS(r, bg, default_color);
+        // FILE* f=fopen("./tests/singleSource.txt", "a");
+        // Show_graph(f, bg);
+        // fprintf(f, "\n");
+        // fclose(f);
 }
-
-void Show_graph(FILE *out, GRAPH::Graph<LLVMIR::L_block *> &bg)
-{
-    for (auto block_node : bg.mynodes)
-    {
-        auto block = block_node.second->info;
-        fprintf(out, "%s \n", block->label->name.c_str());
-        fprintf(out, "pred  %zu  ", block_node.second->preds.size());
-        for (auto pred : block_node.second->preds)
-        {
-            fprintf(out, "%s  ", bg.mynodes[pred]->info->label->name.c_str());
+void Show_graph(FILE* out,GRAPH::Graph<LLVMIR::L_block*>&bg){
+    
+    for(auto block_node:bg.mynodes){
+        auto block=block_node.second->info;
+        fprintf(out,"%s \n",block->label->name.c_str());
+        fprintf(out,"pred  %zu  ",block_node.second->preds.size());
+        for(auto pred:block_node.second->preds){
+            fprintf(out,"%s  ",bg.mynodes[pred]->info->label->name.c_str());
+            fprintf(out,"%d  ",bg.mynodes[pred]->color);
         }
-        fprintf(out, "\n");
-        fprintf(out, "succ  %zu  ", block_node.second->succs.size());
-        for (auto succ : block_node.second->succs)
-        {
-            fprintf(out, "%s  ", bg.mynodes[succ]->info->label->name.c_str());
+        fprintf(out,"\n");
+        fprintf(out,"succ  %zu  ",block_node.second->succs.size());
+        for(auto succ:block_node.second->succs){
+            fprintf(out,"%s  ",bg.mynodes[succ]->info->label->name.c_str());
+            fprintf(out,"%d  ",bg.mynodes[succ]->color);
         }
-        fprintf(out, "\n");
+        fprintf(out,"\n");
     }
 }
