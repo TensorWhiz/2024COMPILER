@@ -109,31 +109,20 @@ void combine_addr(LLVMIR::L_func *fun)
         }
     }
 }
-bool is_scalar_ptr(AS_operand *as)
-{
-    return as->kind == OperandKind::TEMP && as->u.TEMP->type == TempType::INT_PTR && as->u.TEMP->len == 0;
-}
+
 void mem2reg(LLVMIR::L_func *fun)
 {
     for (auto x : fun->blocks)
     {
-        list<L_stm *>::iterator it = x->instrs.begin();
-        while (it != x->instrs.end())
-        {
-            if (is_mem_variable(*it))
+        for(auto& it:x->instrs){
+            if (is_mem_variable(it))
             {
-                auto xx = AS_Operand_Temp(Temp_newtemp_int());
-                temp2ASoper[(*it)->u.ALLOCA->dst->u.TEMP] = xx;
-                *it = L_Move(AS_Operand_Const(0), xx);
-                // it = x->instrs.erase(it);
-                it++;
+                auto temp = AS_Operand_Temp(Temp_newtemp_int());
+                temp2ASoper[(it)->u.ALLOCA->dst->u.TEMP] = temp;
+                it = L_Move(AS_Operand_Const(0), temp);
             }
-            else
-                it++;
         }
     }
-    // 如果load
-    // getptr
     unordered_map<Temp_temp *, AS_operand *> mem_scalar_load;
 
     for (auto x : fun->blocks)
@@ -141,7 +130,6 @@ void mem2reg(LLVMIR::L_func *fun)
         list<L_stm *>::iterator it = x->instrs.begin();
         while (it != x->instrs.end())
         {
-            // 如果load，首先，如果是标量，不会有getptr。
             switch ((*it)->type)
             {
             case L_StmKind::T_STORE:
@@ -149,14 +137,10 @@ void mem2reg(LLVMIR::L_func *fun)
                 AS_operand *res = nullptr;
                 AS_operand *src = nullptr;
                 auto store = (*it)->u.STORE;
-                if (is_scalar_ptr(store->ptr))
-                // 将一个mem_variable存进数组
-                // 将一个mem_variable给另一个mem_variable
-                // 将一个东西给mem_variable
+                if (store->ptr->kind == OperandKind::TEMP && store->ptr->u.TEMP->type == TempType::INT_PTR && store->ptr->u.TEMP->len == 0)
                 {
                     if (temp2ASoper.find(store->ptr->u.TEMP) != temp2ASoper.end())
                         res = temp2ASoper[store->ptr->u.TEMP];
-                    // 没有就是nullptr
                 }
                 if (store->src->kind == OperandKind::TEMP && store->src->u.TEMP->type == TempType::INT_TEMP)
                     src = mem_scalar_load[store->src->u.TEMP];
@@ -175,13 +159,11 @@ void mem2reg(LLVMIR::L_func *fun)
             }
             case L_StmKind::T_LOAD:
             {
-                /*
-                %r103 = load i32, ptr %r100, align 4
-                */
                 AS_operand *res = nullptr;
                 AS_operand *src = nullptr;
                 auto load = (*it)->u.LOAD;
-                if (is_scalar_ptr(load->ptr))
+                if (load->ptr->kind == OperandKind::TEMP && load->ptr->u.TEMP->type == TempType::INT_PTR && load->ptr->u.TEMP->len == 0
+                )
                 {
                     if (temp2ASoper.find(load->ptr->u.TEMP) != temp2ASoper.end())
                     {
@@ -413,10 +395,6 @@ void tree_Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
         tree_dominators[bg.mynodes[i]->info].pred = nearest;
         tree_dominators[nearest].succs.emplace(bg.mynodes[i]->info);
     }
-
-    // std::cout<<"tree finish"<<std::endl;
-
-    // printf_D_tree();
 }
 
 void computeDF(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block *> *r)
