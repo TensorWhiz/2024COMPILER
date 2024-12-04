@@ -4,3 +4,5 @@ tests/public/*.ll
 tests/private/*.ll
 tests/end/*.ll
 tests/end2/*.ll
+tests/public/*.ast
+tests/private/*.ast

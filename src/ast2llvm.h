@@ -48,11 +48,9 @@ AS_operand* ast2llvmArithBiOpExpr(aA_arithBiOpExpr a);
 AS_operand* ast2llvmArithUExpr(aA_arithUExpr a);
 AS_operand* ast2llvmArithExpr(aA_arithExpr a);
 AS_operand* ast2llvmExprUnit(aA_exprUnit e);
-
 LLVMIR::L_prog* ast2llvm(aA_program p);
 LLVMIR::L_func* ast2llvmFuncBlock(Func_local *f);
 void ast2llvm_moveAlloca(LLVMIR::L_func *f);
-
 int ast2llvmRightVal_first(aA_rightVal r);
 int ast2llvmBoolExpr_first(aA_boolExpr b);
 int ast2llvmBoolBiOpExpr_first(aA_boolBiOpExpr b);
@@ -63,5 +61,20 @@ int ast2llvmArithBiOpExpr_first(aA_arithBiOpExpr a);
 int ast2llvmArithUExpr_first(aA_arithUExpr a);
 int ast2llvmArithExpr_first(aA_arithExpr a);
 int ast2llvmExprUnit_first(aA_exprUnit e);
+void loadAndStore(AS_operand *dst_ptr, AS_operand *src);
+AS_operand *MyLoad(AS_operand *left);
+void jump(Temp_label *label);
+void ast2llvmStmtvarDecl(aA_varDeclStmt s);
+void ast2llvmStmtassign(aA_assignStmt s);
+void ast2llvmStmtcall(aA_callStmt s);
+void ast2llvmStmtif(aA_ifStmt s, Temp_label *con_label, Temp_label *bre_label);
+void ast2llvmStmtwhile(aA_whileStmt s);
+void ast2llvmStmtreturn(aA_returnStmt s);
+AS_operand *ast2llvmfnCall(aA_fnCall callExpr);
+AS_operand *loadFunParams(AS_operand *left, TempDef &tempdef);
+AS_operand *ast2llvmId(string id);
+AS_operand *ast2llvmArray(aA_arrayExpr arrExpr);
+AS_operand *ast2llvmMember(aA_memberExpr memberExpr);
+AS_operand *MyLoad(AS_operand *left);
 
 #endif
