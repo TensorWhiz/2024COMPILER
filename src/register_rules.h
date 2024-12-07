@@ -14,5 +14,6 @@ const int XXn4 = 19;
 const int FPR = 29;
 const int RETR = 0;
 const int LNR = 30;
-const int INT_LENGTH = 4;
+const int INT_LENGTH = 4;//bytes
+const int INT_LENGTH_ = 4;//bytes
 #endif

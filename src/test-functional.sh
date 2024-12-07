@@ -48,10 +48,10 @@ test_single() {
         passed_tests=$((passed_tests + 1))
     else
         echo fail
-        echo "Expect:"
-        cat $func_testcase_dir/$test_name.out
-        echo "Got:"
-        cat ./output/$test_name.out
+        # echo "Expect:"
+        # cat $func_testcase_dir/$test_name.out
+        # echo "Got:"
+        # cat ./output/$test_name.out
         failed_tests=$((failed_tests + 1))
         failed_files+=("$test_name")
     fi

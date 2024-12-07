@@ -44,7 +44,7 @@ LLVMIR::L_prog *SSA(LLVMIR::L_prog *prog)
         init_table();
         combine_addr(fun);
         //developFuncEntryBlock(fun);
-        // mem2reg(fun);
+        mem2reg(fun);
         //  std::cout<<"mem2reg finish"<<std::endl;
         auto RA_bg = Create_bg(fun->blocks);
         SingleSourceGraph(RA_bg.mynodes[0], RA_bg, fun);
@@ -195,56 +195,56 @@ bool isAllocaPromotable(const L_stm *AI)
     return true;
 }
 
-void PromoteMem2RegRun(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
-{
-    for (int AllocaNum = 0; AllocaNum != Allocas.size(); ++AllocaNum)
-    {
-        // L_stm *AI = Allocas[AllocaNum];
-        // if (allocUses.find(AI) != allocUses.end())
-        // {
-        //     if (allocUses[AI].empty())
-        //         BB->instrs.remove(AI);
-        //     // If there are no uses of the alloca, just delete it now.
-        //     // Remove the alloca from the Allocas list, since it has been processed
-        //     //    RemoveFromAllocasList(AllocaNum);
-        //     continue;
-        // }
-    }
-}
+// void PromoteMem2RegRun(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
+// {
+//     for (int AllocaNum = 0; AllocaNum != Allocas.size(); ++AllocaNum)
+//     {
+//         // L_stm *AI = Allocas[AllocaNum];
+//         // if (allocUses.find(AI) != allocUses.end())
+//         // {
+//         //     if (allocUses[AI].empty())
+//         //         BB->instrs.remove(AI);
+//         //     // If there are no uses of the alloca, just delete it now.
+//         //     // Remove the alloca from the Allocas list, since it has been processed
+//         //     //    RemoveFromAllocasList(AllocaNum);
+//         //     continue;
+//         // }
+//     }
+// }
 
-void PromoteMemToReg(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
-{
-    // If there is nothing to do, bail out...
-    if (Allocas.empty())
-        return;
-    PromoteMem2RegRun(BB, Allocas, DT);
-}
+// void PromoteMemToReg(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
+// {
+//     // If there is nothing to do, bail out...
+//     if (Allocas.empty())
+//         return;
+//     PromoteMem2RegRun(BB, Allocas, DT);
+// }
 
-static bool promoteMemoryToRegister(LLVMIR::L_func *F, DominatorTree &DT)
-{
-    std::vector<L_stm *> Allocas;
-    auto BB = F->blocks.front(); // Get the entry node for the function
-    bool Changed = false;
-    while (true)
-    {
-        Allocas.clear();
-        // Find allocas that are safe to promote, by looking at all instructions in
-        // the entry node
-        list<L_stm *>::iterator it = BB->instrs.begin();
-        while (it != BB->instrs.end())
-        {
-            if ((*it)->type == L_StmKind::T_ALLOCA) // Is it an alloca?
-                if (isAllocaPromotable(*it))
-                    Allocas.push_back(*it);
-        }
-        if (Allocas.empty())
-            break;
+// static bool promoteMemoryToRegister(LLVMIR::L_func *F, DominatorTree &DT)
+// {
+//     std::vector<L_stm *> Allocas;
+//     auto BB = F->blocks.front(); // Get the entry node for the function
+//     bool Changed = false;
+//     while (true)
+//     {
+//         Allocas.clear();
+//         // Find allocas that are safe to promote, by looking at all instructions in
+//         // the entry node
+//         list<L_stm *>::iterator it = BB->instrs.begin();
+//         while (it != BB->instrs.end())
+//         {
+//             if ((*it)->type == L_StmKind::T_ALLOCA) // Is it an alloca?
+//                 if (isAllocaPromotable(*it))
+//                     Allocas.push_back(*it);
+//         }
+//         if (Allocas.empty())
+//             break;
 
-        PromoteMemToReg(BB, Allocas, DT);
-        Changed = true;
-    }
-    return Changed;
-}
+//         PromoteMemToReg(BB, Allocas, DT);
+//         Changed = true;
+//     }
+//     return Changed;
+// }
 
 void mem2reg(LLVMIR::L_func *fun)
 {

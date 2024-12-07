@@ -37,4 +37,7 @@ void llvm2asmDecl(vector<AS_decl *> &decls, L_def &def);
 AS_func *llvm2asmFunc(L_func &func);
 AS_prog *llvm2asm(L_prog &p);
 
+// Util
+int getMemLength(TempDef &members); // 获得一个tempdef的大小
+void getCalls(AS_reg *&op_reg, AS_operand *as_operand, list<AS_stm *> &as_list);
 #endif
