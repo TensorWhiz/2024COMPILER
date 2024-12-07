@@ -150,9 +150,6 @@ void set_stack(L_func &func)
                 }
                 else if (alloca->type == TempType::STRUCT_PTR)
                 {
-                    // int len = alloca->len;
-                    // if (alloca->len <= 0)
-                    //     len = 1;
                     int size = structLayout[alloca->structname]->size;
                     stack_frame += max(size, size * alloca->len); // ？？？
                 }

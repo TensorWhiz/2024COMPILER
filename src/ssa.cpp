@@ -43,7 +43,7 @@ LLVMIR::L_prog *SSA(LLVMIR::L_prog *prog)
     {
         init_table();
         combine_addr(fun);
-        //developFuncEntryBlock(fun);
+        developFuncEntryBlock(fun);
         mem2reg(fun);
         //  std::cout<<"mem2reg finish"<<std::endl;
         auto RA_bg = Create_bg(fun->blocks);
@@ -114,64 +114,56 @@ void combine_addr(LLVMIR::L_func *fun)
 std::vector<L_stm *> allAllocaStms;
 std::map<L_stm *, std::vector<L_block *>> allocDefs; // alloc -> list of defs
 std::map<L_stm *, std::vector<L_block *>> allocUses; // alloc -> list of uses
-// void developFuncEntryBlock(LLVMIR::L_func *fun)
-// {
-//     allAllocaStms.clear();
-//     allocDefs.clear();
-//     allocUses.clear();
-//     auto entryBlock = fun->blocks.front();
+void developFuncEntryBlock(LLVMIR::L_func *fun)
+{
+    allAllocaStms.clear();
+    allocDefs.clear();
+    allocUses.clear();
+    auto entryBlock = fun->blocks.front();
 
-//     for (auto block : fun->blocks)
-//     {
-//         list<L_stm *>::iterator it = block->instrs.begin();
-//         while (it != block->instrs.end())
-//         {
-//             if (is_mem_variable(*it))
-//             {
-//                 allAllocaStms.push_back(*it);
-//                 it = block->instrs.erase(it);
-//             }
-//             else
-//             {
-//                 ++it;
-//             }
-//         }
-//     }
-//     auto it = entryBlock->instrs.begin();
-//     it++;
+    for (auto block : fun->blocks)
+    {
+        list<L_stm *>::iterator it = block->instrs.begin();
+        while (it != block->instrs.end())
+        {
+            if (is_mem_variable(*it))
+            {
+                allAllocaStms.push_back(*it);
+                it = block->instrs.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+    auto it = entryBlock->instrs.begin();
+    it++;
 
-//     for (auto allocStm : allAllocaStms)
-//     {
-//         entryBlock->instrs.insert(it, allocStm); // 将 alloc 插入到入口块
+    for (auto allocStm : allAllocaStms)
+    {
+        entryBlock->instrs.insert(it, allocStm); // 将 alloc 插入到入口块
 
-//         // 查找所有使用 alloc 指令的指令
-//         for (auto block : fun->blocks)
-//         {
-//             for (auto userIt = block->instrs.begin(); userIt != block->instrs.end(); ++userIt)
-//             {
-//                 auto alloc_temp = allocStm->u.ALLOCA->dst;
+        // 查找所有使用 alloc 指令的指令
+        for (auto block : fun->blocks)
+        {
+            for (auto userIt = block->instrs.begin(); userIt != block->instrs.end(); ++userIt)
+            {
+                auto alloc_temp = allocStm->u.ALLOCA->dst;
 
-//                 auto operands = get_use_operand(*userIt);
-//                 for (auto operand : operands)
-//                 {
-//                     if ((*operand)->kind == OperandKind::TEMP && (*operand)->u.TEMP == alloc_temp->u.TEMP)
-//                     {
-//                         allocUses[allocStm].push_back(block); // 记录使用 alloc 的指令
-//                     }
-//                 }
+                auto operands = get_use_operand(*userIt);
+                for (auto operand : operands)
+                {
+                    if ((*operand)->kind == OperandKind::TEMP && (*operand)->u.TEMP == alloc_temp->u.TEMP)
+                    {
+                        allocUses[allocStm].push_back(block); // 记录使用 alloc 的指令
+                    }
+                }
 
-//                 auto operands = get_def_operand(*userIt);
-//                 for (auto operand : operands)
-//                 {
-//                     if ((*operand)->kind == OperandKind::TEMP && (*operand)->u.TEMP == alloc_temp->u.TEMP)
-//                     {
-//                         allocDefs[allocStm].push_back(block); // 记录使用 alloc 的指令
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+            }
+        }
+    }
+}
 
 bool isAllocaPromotable(const L_stm *AI)
 {
