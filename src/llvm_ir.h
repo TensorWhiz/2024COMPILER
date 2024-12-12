@@ -203,6 +203,8 @@ struct L_stm
         L_alloca *ALLOCA;
         L_gep *GEP;
     } u;
+    struct L_block* bb;
+    void removeFromBlock();
 };
 
 L_stm* L_Binop(L_binopKind op,AS_operand* left,AS_operand *right,AS_operand *dst);
@@ -235,6 +237,9 @@ struct L_func
     std::vector<Temp_temp*> args;
     std::list<L_block*> blocks;
     L_func(const std::string &_name,FuncType _ret,const std::vector<Temp_temp*> _args,const std::list<L_block*> &_blocks);
+    L_block* getEntryBlock(){
+        return blocks.front();
+    }
 };
 
 struct L_prog
@@ -245,6 +250,7 @@ struct L_prog
 };
 
 L_block* L_Block(const std::list<L_stm*> instrs);
+
 
 }
 

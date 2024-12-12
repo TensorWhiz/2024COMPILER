@@ -218,7 +218,7 @@ std::list<AS_operand **> get_use_operand(L_stm *stm)
     break;
     case L_StmKind::T_CMP:
     {
-        if (stm->u.CMP->left->kind == OperandKind::TEMP && stm->u.CMP->left->u.TEMP->type == TempType::INT_TEMP)
+        if ( stm->u.CMP->left->kind == OperandKind::TEMP && stm->u.CMP->left->u.TEMP->type == TempType::INT_TEMP)
         {
             AS_operand_list.push_back(&(stm->u.CMP->left));
         }
@@ -248,7 +248,7 @@ std::list<AS_operand **> get_use_operand(L_stm *stm)
     {
         for (auto &arg : stm->u.CALL->args)
         {
-            if (arg->kind == OperandKind::TEMP && arg->u.TEMP->type == TempType::INT_TEMP)
+            if (arg->kind == OperandKind::TEMP&&arg->u.TEMP->type == TempType::INT_TEMP)
             {
                 AS_operand_list.push_back(&arg);
             }
@@ -268,6 +268,7 @@ std::list<AS_operand **> get_use_operand(L_stm *stm)
     break;
     case L_StmKind::T_RETURN:
     {
+        
         if (stm->u.RET->ret != nullptr)
         {
             if (stm->u.RET->ret->kind == OperandKind::TEMP && stm->u.RET->ret->u.TEMP->type == TempType::INT_TEMP)
@@ -279,13 +280,10 @@ std::list<AS_operand **> get_use_operand(L_stm *stm)
     break;
     case L_StmKind::T_PHI:
     {
-        for (auto &arg : stm->u.PHI->phis)
-        {
-            if (arg.first->kind == OperandKind::TEMP && arg.first->u.TEMP->type == TempType::INT_TEMP)
-            {
-                AS_operand_list.push_back(&arg.first);
+         for(int i = 0; i<stm->u.PHI->phis.size(); i++){
+                AS_operand* operand = stm->u.PHI->phis[i].first;
+                AS_operand_list.push_back(&(operand));
             }
-        }
     }
     break;
     case L_StmKind::T_GEP:
@@ -298,12 +296,16 @@ std::list<AS_operand **> get_use_operand(L_stm *stm)
     break;
     case L_StmKind::T_STORE:
     {
-        if (stm->u.STORE->src->kind == OperandKind::TEMP && stm->u.STORE->src->u.TEMP->type == TempType::INT_TEMP)
+       if (stm->u.STORE->src->kind == OperandKind::TEMP && stm->u.STORE->src->u.TEMP->type == TempType::INT_TEMP)
         {
             AS_operand_list.push_back(&(stm->u.STORE->src));
         }
     }
     break;
+    // case L_StmKind::T_LOAD:{
+    //     AS_operand_list.push_back(&stm->u.STORE->ptr);
+    // }
+    // break;
     default:
     {
     }

@@ -77,7 +77,7 @@ Name_name *Name_newname_struct_ptr(Temp_label *name,int len,const std::string &s
 
 enum class OperandKind
 {
-    TEMP, NAME, ICONST
+    TEMP, NAME, ICONST,UnDEF
 };
 //指令中的运算对象
 struct AS_operand 
@@ -97,5 +97,6 @@ struct AS_operand
 AS_operand* AS_Operand_Temp(Temp_temp *temp);
 AS_operand* AS_Operand_Name(Name_name *name);
 AS_operand* AS_Operand_Const(int iconst);
+AS_operand* AS_Operand_Undef();
 
 #endif

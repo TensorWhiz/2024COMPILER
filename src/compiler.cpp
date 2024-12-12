@@ -70,12 +70,12 @@ int main(int argc, char * argv[]) {
     printL_prog(LLVMStream,l_prog);
     LLVMStream.close();
 
-    ofstream ASMStream;
-    ASMStream.open(file_name + ".S");
-    auto as_prog = llvm2asm(*l_prog);
+    // ofstream ASMStream;
+    // ASMStream.open(file_name + ".S");
+    // auto as_prog = llvm2asm(*l_prog);
 
-    printAS_prog(ASMStream,as_prog);
-    ASMStream.close();
+    // printAS_prog(ASMStream,as_prog);
+    // ASMStream.close();
 
     return 0;
 }

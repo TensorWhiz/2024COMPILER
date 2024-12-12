@@ -95,6 +95,12 @@ AS_operand* AS_Operand_Const(int iconst)
     return p;
 }
 
+AS_operand* AS_Operand_Undef(){
+  auto p = new AS_operand();
+  p->kind = OperandKind::UnDEF;
+  return p;
+}
+
 void TempSet_add(TempSet tl, Temp_temp* t){
   assert(tl != nullptr);
   (*tl).emplace(t);

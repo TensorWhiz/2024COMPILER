@@ -1396,7 +1396,9 @@ void ast2llvmStmtvarDecl(aA_varDeclStmt s)
                 Temp_temp *temp = Temp_newtemp_int_ptr(0);
                 localVarMap.emplace(*varDeclScalar->id, temp);
                 tempVar[tempVar.size() - 1].push_back(*varDeclScalar->id);
-                emit_irs.push_back(L_Alloca(AS_Operand_Temp(temp)));
+                AS_operand* op=AS_Operand_Temp(temp);
+                emit_irs.push_back(L_Alloca(op));
+                emit_irs.push_back(L_Store(AS_Operand_Const(0),op));
             }
         }
         else if (s->u.varDecl->kind == A_varDeclArrayKind)

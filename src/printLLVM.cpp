@@ -687,6 +687,9 @@ void LLVMIR::printL_oper(std::ostream &os,AS_operand *oper)
         os << "@" << oper->u.NAME->name->name;
         break;
     }
+    case OperandKind::UnDEF:{
+        os<< "undef";
+    }
     default:
         break;
     }

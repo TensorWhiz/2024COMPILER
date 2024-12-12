@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 #include <vector>
 #include "bg_llvm.h"
 #include "graph.hpp"
@@ -16,15 +17,10 @@
 using namespace std;
 using namespace LLVMIR;
 using namespace GRAPH;
-struct imm_Dominator
-{
-    LLVMIR::L_block *pred;
-    unordered_set<LLVMIR::L_block *> succs;
-};
 
 unordered_map<L_block *, unordered_set<L_block *>> dominators;
 unordered_map<L_block *, imm_Dominator> tree_dominators;
-unordered_map<L_block *, unordered_set<L_block *>> DF_array;
+unordered_map<L_block *, unordered_set<L_block *>> df_array;
 unordered_map<L_block *, Node<LLVMIR::L_block *> *> revers_graph;
 unordered_map<Temp_temp *, AS_operand *> temp2ASoper;
 
@@ -32,40 +28,45 @@ static void init_table()
 {
     dominators.clear();
     tree_dominators.clear();
-    DF_array.clear();
+    df_array.clear();
     revers_graph.clear();
     temp2ASoper.clear();
 }
 
 LLVMIR::L_prog *SSA(LLVMIR::L_prog *prog)
 {
-    for (auto &fun : prog->funcs)
+    for (auto fun : prog->funcs)
     {
         init_table();
         combine_addr(fun);
-        developFuncEntryBlock(fun);
-        mem2reg(fun);
-        //  std::cout<<"mem2reg finish"<<std::endl;
-        auto RA_bg = Create_bg(fun->blocks);
-        SingleSourceGraph(RA_bg.mynodes[0], RA_bg, fun);
-        Liveness(RA_bg.mynodes[0], RA_bg, fun->args);
-        Dominators(RA_bg);
-        // printf_domi();
-        tree_Dominators(RA_bg);
-        // printf_D_tree();
-        // 默认0是入口block
-        computeDF(RA_bg, RA_bg.mynodes[0]);
-        // printf_DF();
-
-        Place_phi_fu(RA_bg, fun);
-        // std::cout<<"phi"<<std::endl;
-        Rename(RA_bg);
+        // developFuncEntryBlock(*fun);
+        // mem2reg(fun);
+        //   auto RA_bg = Create_bg(fun->blocks);
+        //   SingleSourceGraph(RA_bg.mynodes[0], RA_bg, fun);
+        //   Liveness(RA_bg.mynodes[0], RA_bg, fun->args);
+        //   Dominators(RA_bg);
+        //   tree_Dominators(RA_bg);
+        //   computeDF(RA_bg, RA_bg.mynodes[0]);
+        //   Place_phi_fu(RA_bg, fun);
+        //   Rename(RA_bg);
+        runOnFunction(*fun);
         combine_addr(fun);
     }
     return prog;
 }
 
-static bool is_mem_variable(L_stm *stm)
+void set_stm_block(LLVMIR::L_func *fun)
+{
+    for (auto &block : fun->blocks)
+    {
+        for (auto &stm : block->instrs)
+        {
+            stm->bb = block;
+        }
+    }
+}
+
+bool is_mem_variable(L_stm *stm)
 {
     return stm->type == L_StmKind::T_ALLOCA && stm->u.ALLOCA->dst->kind == OperandKind::TEMP && stm->u.ALLOCA->dst->u.TEMP->type == TempType::INT_PTR && stm->u.ALLOCA->dst->u.TEMP->len == 0;
 }
@@ -110,133 +111,6 @@ void combine_addr(LLVMIR::L_func *fun)
         }
     }
 }
-
-std::vector<L_stm *> allAllocaStms;
-std::map<L_stm *, std::vector<L_block *>> allocDefs; // alloc -> list of defs
-std::map<L_stm *, std::vector<L_block *>> allocUses; // alloc -> list of uses
-void developFuncEntryBlock(LLVMIR::L_func *fun)
-{
-    allAllocaStms.clear();
-    allocDefs.clear();
-    allocUses.clear();
-    auto entryBlock = fun->blocks.front();
-
-    for (auto block : fun->blocks)
-    {
-        list<L_stm *>::iterator it = block->instrs.begin();
-        while (it != block->instrs.end())
-        {
-            if (is_mem_variable(*it))
-            {
-                allAllocaStms.push_back(*it);
-                it = block->instrs.erase(it);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-    }
-    auto it = entryBlock->instrs.begin();
-    it++;
-
-    for (auto allocStm : allAllocaStms)
-    {
-        entryBlock->instrs.insert(it, allocStm); // 将 alloc 插入到入口块
-
-        // 查找所有使用 alloc 指令的指令
-        for (auto block : fun->blocks)
-        {
-            for (auto userIt = block->instrs.begin(); userIt != block->instrs.end(); ++userIt)
-            {
-                auto alloc_temp = allocStm->u.ALLOCA->dst;
-
-                auto operands = get_use_operand(*userIt);
-                for (auto operand : operands)
-                {
-                    if ((*operand)->kind == OperandKind::TEMP && (*operand)->u.TEMP == alloc_temp->u.TEMP)
-                    {
-                        allocUses[allocStm].push_back(block); // 记录使用 alloc 的指令
-                    }
-                }
-
-            }
-        }
-    }
-}
-
-bool isAllocaPromotable(const L_stm *AI)
-{
-    // Only allow direct loads and stores...
-
-    //   for (const User *U : AI->users()) {
-    //     if (const LoadInst *LI = dyn_cast<LoadInst>(U)) {
-    //       if (LI->getType() != AI->getAllocatedType())
-    //         return false;
-    //     } else if (const StoreInst *SI = dyn_cast<StoreInst>(U)) {
-    //       if (SI->getValueOperand() == AI ||
-    //           SI->getValueOperand()->getType() != AI->getAllocatedType())
-    //         return false; // Don't allow a store OF the AI, only INTO the AI.
-    //       // Note that atomic stores can be transformed; atomic semantics do
-    //       // not have any meaning for a local alloca.
-    //     }else {
-    //       return false;
-    //     }
-    //   }
-
-    return true;
-}
-
-// void PromoteMem2RegRun(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
-// {
-//     for (int AllocaNum = 0; AllocaNum != Allocas.size(); ++AllocaNum)
-//     {
-//         // L_stm *AI = Allocas[AllocaNum];
-//         // if (allocUses.find(AI) != allocUses.end())
-//         // {
-//         //     if (allocUses[AI].empty())
-//         //         BB->instrs.remove(AI);
-//         //     // If there are no uses of the alloca, just delete it now.
-//         //     // Remove the alloca from the Allocas list, since it has been processed
-//         //     //    RemoveFromAllocasList(AllocaNum);
-//         //     continue;
-//         // }
-//     }
-// }
-
-// void PromoteMemToReg(L_block *BB, std::vector<L_stm *> Allocas, DominatorTree &DT)
-// {
-//     // If there is nothing to do, bail out...
-//     if (Allocas.empty())
-//         return;
-//     PromoteMem2RegRun(BB, Allocas, DT);
-// }
-
-// static bool promoteMemoryToRegister(LLVMIR::L_func *F, DominatorTree &DT)
-// {
-//     std::vector<L_stm *> Allocas;
-//     auto BB = F->blocks.front(); // Get the entry node for the function
-//     bool Changed = false;
-//     while (true)
-//     {
-//         Allocas.clear();
-//         // Find allocas that are safe to promote, by looking at all instructions in
-//         // the entry node
-//         list<L_stm *>::iterator it = BB->instrs.begin();
-//         while (it != BB->instrs.end())
-//         {
-//             if ((*it)->type == L_StmKind::T_ALLOCA) // Is it an alloca?
-//                 if (isAllocaPromotable(*it))
-//                     Allocas.push_back(*it);
-//         }
-//         if (Allocas.empty())
-//             break;
-
-//         PromoteMemToReg(BB, Allocas, DT);
-//         Changed = true;
-//     }
-//     return Changed;
-// }
 
 void mem2reg(LLVMIR::L_func *fun)
 {
@@ -363,12 +237,9 @@ std::unordered_set<T> make_intersection(std::unordered_set<T> &tl1, std::unorder
 
 void Dominators(GRAPH::Graph<LLVMIR::L_block *> &bg)
 {
-    // 初始化
-    // 对于根节点（入口节点 nodes[0]）：支配集合仅包含自身
     unordered_set<L_block *> dom_set;
     dom_set.emplace(bg.mynodes[0]->info);
     dominators[bg.mynodes[0]->info] = dom_set;
-    // 对于非根节点：将其支配集合初始设置为所有基本块，即 blocks
     for (int i = 1; i < bg.nodecount; i++)
     {
         unordered_set<L_block *> dom_set = unordered_set<L_block *>();
@@ -464,7 +335,7 @@ void printf_DF()
 {
     FILE *f = fopen("./tests/df.txt", "w");
     fprintf(f, "DF:\n");
-    for (auto x : DF_array)
+    for (auto x : df_array)
     {
         fprintf(f, "%s :\n", x.first->label->name.c_str());
         for (auto t : x.second)
@@ -542,7 +413,7 @@ void computeDF(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block 
         int succ_id = bg.findNode(succ);
         computeDF(bg, bg.mynodes[succ_id]);
 
-        unordered_set<L_block *> c_df_array = DF_array[succ];
+        unordered_set<L_block *> c_df_array = df_array[succ];
         for (L_block *c_df : c_df_array)
         {
             if (dominators[c_df].find(r->info) == dominators[c_df].end() || r->info == c_df)
@@ -552,7 +423,7 @@ void computeDF(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block 
         }
     }
 
-    DF_array[r->info] = s;
+    df_array[r->info] = s;
 }
 
 // 只对标量做
@@ -584,7 +455,7 @@ void Place_phi_fu(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
         while (!w.empty())
         {
             L_block *n = *w.begin();
-            unordered_set<L_block *> DF_n = DF_array[n];
+            unordered_set<L_block *> DF_n = df_array[n];
             w.erase(n);
             for (auto &y : DF_n)
             {
@@ -621,7 +492,7 @@ static list<AS_operand **> get_def_int_operand(LLVMIR::L_stm *stm)
     list<AS_operand **> ret1 = get_def_operand(stm), ret2;
     for (auto AS_op : ret1)
     {
-        if ((**AS_op).u.TEMP->type == TempType::INT_TEMP)
+        if ((**AS_op).kind == OperandKind::TEMP && (**AS_op).u.TEMP->type == TempType::INT_TEMP)
         {
             ret2.push_back(AS_op);
         }
@@ -634,7 +505,7 @@ static list<AS_operand **> get_use_int_operand(LLVMIR::L_stm *stm)
     list<AS_operand **> ret1 = get_use_operand(stm), ret2;
     for (auto AS_op : ret1)
     {
-        if ((**AS_op).u.TEMP->type == TempType::INT_TEMP)
+        if ((**AS_op).kind == OperandKind::TEMP && (**AS_op).u.TEMP->type == TempType::INT_TEMP)
         {
             ret2.push_back(AS_op);
         }
@@ -650,7 +521,6 @@ static void Rename_temp(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR:
     // 语句处理;
     for (auto &stm : n->info->instrs)
     {
-        // 先处理非phi的use: 存在i = i+1 的情况
         if (stm->type != L_StmKind::T_PHI)
         {
             for (auto use_operand : get_use_int_operand(stm))
@@ -780,149 +650,552 @@ void QueuePhiNode(GRAPH::Graph<LLVMIR::L_block *> &bg, L_block *block, Temp_temp
     }
 }
 
-// void PromoteMemoryToRegister(LLVMIR::L_func *F, DominatorTree &DT, GRAPH::Graph<LLVMIR::L_block *> &bg)
-// {
-//     // Step 1: Initialize
-//     std::unordered_map<L_stm *, L_stm *> newPhis;      // For storing new Phi nodes
-//     std::unordered_map<L_block *, bool> block_visited; // To mark visited blocks
+std::vector<L_stm *> Allocas_Promoted;
+std::vector<L_stm *> Allocas_UnPromoted;
+std::unordered_map<AS_operand *, std::unordered_set<L_block *>> DefsBlock;
+std::unordered_map<AS_operand *, std::unordered_set<L_block *>> UsesBlock;
 
-//     // Mark all blocks as unvisited
-//     for (auto block : F->blocks)
-//     {
-//         block_visited[block] = false;
-//     }
+unordered_map<AS_operand *, vector<L_stm *>> allocDefs; // alloc -> list of defs
+unordered_map<AS_operand *, vector<L_stm *>> allocUses; // alloc -> list of uses
 
-//     // Step 2: Process Alloca statements
-//     for (auto &allocaStm : allAllocaStms)
-//     {
-//         // Reset visited status for each alloca
-//         for (auto block : F->blocks)
-//             block_visited[block] = false;
+std::map<L_block *, std::map<L_stm *, Temp_temp *>> PhiMap;
 
-//         std::vector<L_block *> worklist1 = allocDefs[allocaStm]; // Worklist containing blocks that define the alloca
+/// @brief 存储基本块的支配边界
+unordered_map<L_block *, unordered_set<L_block *>> DomFsBlock;
+L_stm *OnlyStore;
 
-//         while (!worklist1.empty())
-//         {
-//             L_block *bb = worklist1.back();
-//             worklist1.pop_back();
+void developFuncEntryBlock(L_func &fun)
+{
+    std::vector<L_stm *> F_Allocas;
+    auto entryBlock = fun.blocks.front();
+    for (auto block : fun.blocks)
+    {
+        list<L_stm *>::iterator it = block->instrs.begin();
+        while (it != block->instrs.end())
+        {
 
-//             // Iterate over dominator frontiers
-//             for (L_block *df : DF_array[bb])
-//             {
-//                 if (block_visited[df])
-//                     continue; // Skip if already visited
-//                 block_visited[df] = true;
+            if (is_mem_variable(*it))
+            {
 
-//                 // Insert a new Phi node in df if needed
-//                 int y_index = bg.findNode(df);
-//                 AS_operand *dst = AS_Operand_Temp(Temp_newtemp_int());
-//                 Node<L_block *> *y_node = bg.mynodes[y_index];
-//                 std::vector<std::pair<AS_operand *, Temp_label *>> phis;
-//                 for (auto &pred : y_node->preds)
-//                 {
-//                     phis.push_back(make_pair(dst, bg.mynodes[pred]->info->label));
-//                 }
+                auto alloc = (*it)->u.ALLOCA;
+                allocUses[alloc->dst] = {};
+                allocDefs[alloc->dst] = {};
+                UsesBlock[alloc->dst] = {};
+                DefsBlock[alloc->dst] = {};
+                F_Allocas.push_back(*it);
+                it = block->instrs.erase(it);
+            }
+            else
+            {
+                if ((*it)->type == L_StmKind::T_LOAD)
+                {
+                }
+                else if ((*it)->type == L_StmKind::T_STORE)
+                {
+                }
 
-//                 // Insert the Phi node into the basic block
-//                 auto it = df->instrs.begin();
-//                 it++; // Ensure we insert after the first instruction
-//                 L_stm* phi=L_Phi(dst, phis);
-//                 df->instrs.insert(it,phi );
-//                 newPhis[phi] = allocaStm; // Record the mapping of Phi node to alloca
-//                 worklist1.push_back(df); // Add the frontier to the worklist
-//             }
-//         }
-//     }
+                it++;
+            }
+        }
+    }
+    auto it = entryBlock->instrs.begin();
+    it++;
 
-//     // Step 3: Rename variables in the SSA form
-//     for (auto block : F->blocks)
-//         block_visited[block] = false;
+    for (auto allocStm : F_Allocas)
+    {
+        entryBlock->instrs.insert(it, allocStm);
+    }
+}
 
-//     std::list<std::pair<L_block *, std::unordered_map<L_stm *, AS_operand *>>> worklist2;
-//     worklist2.push_back({F->blocks.front(), {}}); // Initialize with entry block
-//     unordered_map<Temp_temp *, AS_operand *> mem_scalar_load;
-    
-//     while (!worklist2.empty())
-//     {
-//         auto [bb, incomingVals] = worklist2.back();
-//         worklist2.pop_back();
+int getInstructionIndex(L_block *BB, L_stm *I)
+{
+    int index = 0;
+    for (auto it : BB->instrs)
+    {
+        if (I == it)
+            return index;
+        index++;
+    }
+    return -1;
+}
 
-//         if (block_visited[bb])
-//             continue; // Skip if already visited
-//         block_visited[bb] = true;
-        
-//         // Process each instruction in the basic block
-//         for (L_stm *inst : bb->instrs)
-//         {
-//             switch (inst->type)
-//             {
-//             case L_StmKind::T_ALLOCA:
-//                 bb->instrs.remove(inst); // Remove the alloca instruction
-//                 break;
+bool rewriteSingleStoreAlloca(GRAPH::Graph<LLVMIR::L_block *> &bg, L_stm *stm)
+{
+    L_alloca *alloca = stm->u.ALLOCA;
+    // bool StoringGlobalVal = !isa<Instruction>(OnlyStore->getOperand(0));
+    bool StoringGlobalVal = false;
+    L_block *StoreBB = OnlyStore->bb;
+    int StoreIndex = -1;
+    UsesBlock[alloca->dst].clear();
+    for (auto it : allocUses[alloca->dst])
+    {
+        // if (it == OnlyStore)
+        //     continue;
+        if (it->type == L_StmKind::T_LOAD)
+        {
+            L_block *LoadBB = it->bb;
+            if (!StoringGlobalVal)
+            { // Non-instructions are always dominated.
+                if (LoadBB == StoreBB)
+                {
+                    if (StoreIndex == -1)
+                        StoreIndex = getInstructionIndex(StoreBB, OnlyStore);
 
-//             case L_StmKind::T_STORE:
-//             {
-//                 AS_operand *res = nullptr;
-//                 AS_operand *src = nullptr;
-//                 auto store = inst->u.STORE;
-//                 if (store->ptr->kind == OperandKind::TEMP && store->ptr->u.TEMP->type == TempType::INT_PTR && store->ptr->u.TEMP->len == 0)
-//                 {
-//                     if (temp2ASoper.find(store->ptr->u.TEMP) != temp2ASoper.end())
-//                         res = temp2ASoper[store->ptr->u.TEMP];
-//                 }
-//                 if (store->src->kind == OperandKind::TEMP && store->src->u.TEMP->type == TempType::INT_TEMP)
-//                     src = mem_scalar_load[store->src->u.TEMP];
-//                 if (res == nullptr)
-//                 {
-//                     if (src != nullptr)
-//                     {
-//                         store->src = src;
-//                     }
-//                 }
-//                 else
-//                 {
-//                     inst = L_Move(src == nullptr ? store->src : src, res);
-//                 }
-//                 break;
-//             }
-//             case L_StmKind::T_LOAD:
-//             {
-//                 AS_operand *res = nullptr;
-//                 AS_operand *src = nullptr;
-//                 auto load =inst->u.LOAD;
-//                 if (load->ptr->kind == OperandKind::TEMP && load->ptr->u.TEMP->type == TempType::INT_PTR && load->ptr->u.TEMP->len == 0)
-//                 {
-//                     if (temp2ASoper.find(load->ptr->u.TEMP) != temp2ASoper.end())
-//                     {
-//                         mem_scalar_load[load->dst->u.TEMP] = temp2ASoper[load->ptr->u.TEMP];
-//                         bb->instrs.remove(inst);
-//                         continue;
-//                     }
-//                 }
-//                 break;
-//             }
+                    if (unsigned(StoreIndex) > getInstructionIndex(StoreBB, it))
+                    {
+                        UsesBlock[alloca->dst].insert(StoreBB);
+                        continue;
+                    }
+                }
+                else if (!is_dominate(tree_dominators, StoreBB, LoadBB))
+                {
+                    UsesBlock[alloca->dst].insert(LoadBB);
+                    continue;
+                }
+            }
 
-//             case L_StmKind::T_PHI:
-//                 // Handle Phi instructions
-//                 if (newPhis.count(inst))
-//                 {
-//                     //incomingVals[newPhis[inst]] = inst; // Update incoming value for the Phi node
-//                 }
-//                 break;
+            AS_operand *ReplVal = OnlyStore->u.STORE->src;
+            // replace use of load dst
+            for (auto b : bg.mynodes)
+            {
+                for (auto instr : b.second->info->instrs)
+                {
+                    auto ops = get_use_int_operand(instr);
+                    for (auto op : ops)
+                    {
+                        if ((*op)->u.TEMP == (it->u.LOAD->dst->u.TEMP))
+                        {
+                            (*op) = ReplVal;
+                        }
+                    }
+                }
+            }
+            it->removeFromBlock();
+        }
+    }
 
-//             default:
-//                 break;
-//             }
-//         }
+    if (!UsesBlock[alloca->dst].empty())
+        return false;
+    else
+    {
+        OnlyStore->removeFromBlock();
+        stm->removeFromBlock();
+        return true;
+    }
+}
 
-//         // Update incoming values for successor blocks
-//         for (auto succ : bb->succs)
-//         {
-//             for (auto &val : incomingVals)
-//             {
-//             //    incomingVals[succ][val.first] = val.second; // Propagate incoming values to successors
-//             }
-//             //worklist2.push_back({succ, incomingVals}); // Add successor to the worklist
-//         }
-//     }
-// }
+/// 这个函数用于判断alloca指令，是否只有load/store. 如果没有使用，或者只有load和store返回true, 否则返回false
+bool isPromote(L_alloca *AI)
+{
+
+    // Only allow direct and non-volatile loads and stores...
+    // for (L_stm *U : allocUses[AI->dst])
+    // {
+    //     if (U->type == L_StmKind::T_LOAD)
+    //     {
+    //         continue;
+    //     }
+    //     else
+    //     {
+    //         return false;
+    //     }
+    // }
+    // for (L_stm *U : allocDefs[AI->dst])
+    // {
+    //     if (U->type == L_StmKind::T_STORE)
+    //     {
+    //         continue;
+    //     }
+    //     else
+    //     {
+    //         return false;
+    //     }
+    // }
+
+    return true;
+}
+
+/// 收集promoted的alloca指令
+void collectPromotedAllocas(L_func &F)
+{
+    L_block *BB;
+
+    Allocas_Promoted.clear();
+
+    BB = F.getEntryBlock();
+    for (auto instr : BB->instrs)
+    {
+        if (is_mem_variable(instr))
+        {
+            if (isPromote(instr->u.ALLOCA))
+            {
+                Allocas_Promoted.push_back(instr);
+            }
+        }
+    }
+}
+
+/// 分析alloca指令，找出他定义的块和使用的块
+void analysisAlloca(L_func &F, L_alloca *alloc)
+{
+    OnlyStore = nullptr;
+    for (auto block : F.blocks)
+    {
+        for (auto it : block->instrs)
+        {
+            if (it->type == L_StmKind::T_LOAD && it->u.LOAD->ptr->u.TEMP == alloc->dst->u.TEMP)
+            {
+                assert(it->u.LOAD->ptr == alloc->dst);
+                allocUses[it->u.LOAD->ptr].push_back(it);
+                UsesBlock[it->u.LOAD->ptr].emplace(block);
+            }
+            else if (it->type == L_StmKind::T_STORE && it->u.STORE->ptr->u.TEMP == alloc->dst->u.TEMP)
+            {
+                allocDefs[it->u.STORE->ptr].push_back(it);
+                DefsBlock[it->u.STORE->ptr].emplace(block);
+                OnlyStore = it;
+            }
+        }
+    }
+}
+
+void del_undef_phi(L_func &F)
+{
+    set_stm_block(&F);
+    unordered_set<AS_operand *> delset;
+    vector<L_stm *> stmCanBeRemoved;
+    for (auto b : F.blocks)
+    {
+        for (auto it : b->instrs)
+        {
+            if (it->type == L_StmKind::T_PHI)
+            {
+                for (auto pair : it->u.PHI->phis)
+                {
+                    if (pair.first->kind == OperandKind::UnDEF || delset.find(pair.first) != delset.end())
+                    {
+                        delset.insert(it->u.PHI->dst);
+                        stmCanBeRemoved.push_back(it);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    for (auto stm : stmCanBeRemoved)
+    {
+        stm->removeFromBlock();
+    }
+}
+
+void Rename_temp_alloca(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR::L_block *> *n, unordered_map<Temp_temp *, std::stack<AS_operand *>> &Stack, std::vector<L_stm *> &InstCanBeRemoveList, std::unordered_set<AS_operand *> GepPtrList)
+{
+    for (auto &stm : n->info->instrs)
+    {
+        if (stm->type == L_StmKind::T_ALLOCA)
+        {
+            if (is_mem_variable(stm))
+                InstCanBeRemoveList.push_back(stm);
+        }
+
+        else if (stm->type == L_StmKind::T_STORE)
+        {
+            if (GepPtrList.find(stm->u.STORE->ptr) != GepPtrList.end())
+                continue;
+
+            if (stm->u.STORE->ptr->kind == OperandKind::NAME)
+                continue;
+
+            Stack[stm->u.STORE->ptr->u.TEMP].push(stm->u.STORE->src);
+            InstCanBeRemoveList.push_back(stm);
+
+            // if (stm->u.STORE->src->kind == OperandKind::TEMP)
+            // {
+            //     assert(stm->u.STORE->src->u.TEMP != nullptr);
+            //     Stack[stm->u.STORE->ptr->u.TEMP].push(stm->u.STORE->src);
+            //     InstCanBeRemoveList.push_back(stm);
+            // }
+            // else if (stm->u.STORE->src->kind == OperandKind::ICONST)
+            // {
+            //     Stack[stm->u.STORE->ptr->u.TEMP].push(stm->u.STORE->src);
+            //     InstCanBeRemoveList.push_back(stm);
+            // }
+            // else if(stm->u.STORE->src->kind == OperandKind::NAME)
+            // {
+            //     Stack[stm->u.STORE->ptr->u.TEMP].push(stm->u.STORE->src);
+            //     InstCanBeRemoveList.push_back(stm);
+            // }
+        }
+        else if (stm->type == L_StmKind::T_LOAD)
+        {
+            bool del = true;
+            if (stm->u.LOAD->ptr->kind == OperandKind::TEMP && stm->u.LOAD->dst->kind == OperandKind::TEMP)
+            {
+                for (auto b : bg.mynodes)
+                {
+                    bool flag = false;
+                    for (auto it : b.second->info->instrs)
+                    {
+                        if (it->type == L_StmKind::T_GEP && it->u.GEP->new_ptr->u.TEMP == stm->u.LOAD->ptr->u.TEMP)
+                        {
+                            del = false;
+                            flag = true;
+                            break;
+                        }
+                        auto ops = get_use_int_operand(it);
+                        for (auto op : ops)
+                        {
+                            if ((*op)->u.TEMP == (stm->u.LOAD->dst->u.TEMP))
+
+                            {
+                                auto stack = Stack[stm->u.LOAD->ptr->u.TEMP];
+                                auto temp = stack.top();
+                                (*op) = temp;
+                            }
+                        }
+                    }
+                    if (flag)
+                        break;
+                }
+
+                if (del)
+                    InstCanBeRemoveList.push_back(stm);
+            }
+        }
+        else if (stm->type == L_StmKind::T_PHI)
+
+        {
+            AS_operand *new_op = AS_Operand_Temp(Temp_newtemp_int());
+            Stack[stm->u.PHI->dst->u.TEMP].push(new_op);
+            stm->u.PHI->dst = new_op;
+            // Stack[PhiMap[n->info][stm]].push(stm->u.PHI->dst);
+        }
+        else if (stm->type == L_StmKind::T_GEP)
+        {
+            GepPtrList.insert(stm->u.GEP->new_ptr);
+        }
+    }
+    // 后继处理
+    for (auto &succ : n->succs)
+    {
+        int j = 0;
+        for (auto &pred : bg.mynodes[succ]->preds)
+        {
+            if (n->mykey == pred)
+            {
+                break;
+            }
+            j++;
+        }
+        for (auto &stm : bg.mynodes[succ]->info->instrs)
+        {
+            if (stm->type == L_StmKind::T_PHI)
+            {
+                if (stm->u.PHI->phis[j].second == n->info->label)
+                {
+                    if (Stack.find(stm->u.PHI->phis[j].first->u.TEMP) != Stack.end())
+                    {
+                        AS_operand *temp = Stack[stm->u.PHI->phis[j].first->u.TEMP].top();
+                        auto op = temp;
+                        // assert(op->kind!=OperandKind::ICONST);
+                        stm->u.PHI->phis[j] = make_pair(op, n->info->label);
+                    }
+                }
+            }
+        }
+    }
+
+    // 处理子节点
+    for (auto &son : tree_dominators[n->info].succs)
+    {
+        int son_index = bg.findNode(son);
+        Rename_temp_alloca(bg, bg.mynodes[son_index], Stack, InstCanBeRemoveList, GepPtrList);
+    }
+
+    // pop出这个block压入的v
+    for (auto &stm : n->info->instrs)
+    {
+        if (stm->type == L_StmKind::T_STORE)
+        {
+            Stack[stm->u.STORE->ptr->u.TEMP].pop();
+        }
+        else if (stm->type == L_StmKind::T_PHI)
+        {
+            Stack[PhiMap[n->info][stm]].pop();
+        }
+    }
+}
+
+void Rename_alloca(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func &F)
+{
+    // 初始化set
+    unordered_map<Temp_temp *, stack<AS_operand *>> Stack;
+    for (auto alloc : Allocas_Promoted)
+    {
+        Stack[alloc->u.ALLOCA->dst->u.TEMP] = stack<AS_operand *>{};
+        Stack[alloc->u.ALLOCA->dst->u.TEMP].push(AS_Operand_Undef());
+    }
+
+    std::vector<L_stm *> InstCanBeRemoveList;
+    std::unordered_set<AS_operand *> GepPtrList;
+    Rename_temp_alloca(bg, bg.mynodes[0], Stack, InstCanBeRemoveList, GepPtrList);
+
+    while (!InstCanBeRemoveList.empty())
+    {
+        auto Inst = InstCanBeRemoveList.back();
+        Inst->removeFromBlock();
+        InstCanBeRemoveList.pop_back();
+    }
+}
+
+void insertPhi(GRAPH::Graph<LLVMIR::L_block *> &bg, L_func *fun)
+{
+    // unordered_map<L_block *, unordered_set<Temp_temp *>> A_orig;
+    // unordered_map<Temp_temp *,unordered_set<L_block *>>defsites;
+    // for(auto b:bg.mynodes){
+    //     for(auto temp:FG_def(b.second)){
+    //         A_orig[b.second->info].insert(temp);
+    //         defsites[temp].insert(b.second->info);
+    //     }
+
+    // }
+
+    // unordered_map<L_block *, unordered_set<AS_operand *>> A_phi;
+    /// 插入phi节点
+    for (auto alloc : Allocas_Promoted)
+    {
+        unordered_set<L_block *> W;
+        unordered_set<L_block *> f;
+        Temp_temp *a = alloc->u.ALLOCA->dst->u.TEMP;
+        for (L_block *b : DefsBlock[alloc->u.ALLOCA->dst])
+        {
+            W.insert(b);
+        }
+        // W=defsites[a];
+        while (!W.empty())
+        {
+            L_block *n = *W.begin();
+            W.erase(n);
+            for (auto &Y : df_array[n])
+            {
+                // int y_index = bg.findNode(Y);
+                // TempSet_ y_in = FG_In(bg.mynodes[y_index]);
+                if (f.find(Y) == f.end())
+                // if (A_phi[Y].find(a)==A_phi[Y].end()&&y_in.find(a->u.TEMP) != y_in.end())
+                { // insert phi
+                    AS_operand *dst = AS_Operand_Temp(a);
+                    std::vector<std::pair<AS_operand *, Temp_label *>> phis;
+                    for (auto &pred : bg.mynodes[bg.findNode(Y)]->preds)
+                    {
+                        phis.push_back(make_pair(dst, bg.mynodes[pred]->info->label));
+                    }
+                    auto it = Y->instrs.begin();
+                    it++;
+                    L_stm *phi = L_Phi(dst, phis);
+                    Y->instrs.insert(it, phi);
+                    //
+                    f.insert(Y);
+                    PhiMap[Y].insert({phi, alloc->u.ALLOCA->dst->u.TEMP});
+                    // Add the frontier to the worklist
+                    if (W.find(Y) == W.end())
+                        W.insert(Y);
+                }
+            }
+        }
+    }
+}
+
+/// @brief 执行alloca2reg
+/// @param F
+void executeMem2Reg(L_func &F, GRAPH::Graph<LLVMIR::L_block *> &bg)
+{
+    for (auto it = Allocas_Promoted.begin(); it != Allocas_Promoted.end();)
+    {
+        L_stm *AI = (*it);
+        analysisAlloca(F, AI->u.ALLOCA);
+        auto a = allocUses[AI->u.ALLOCA->dst];
+
+        if (allocUses[AI->u.ALLOCA->dst].empty())
+        {
+            for (auto &stm : allocDefs[AI->u.ALLOCA->dst])
+            {
+                stm->removeFromBlock();
+            }
+            AI->removeFromBlock();
+
+            it = Allocas_Promoted.erase(it);
+
+            continue;
+        }
+
+        if (allocDefs[AI->u.ALLOCA->dst].size() == 1)
+        {
+            if (rewriteSingleStoreAlloca(bg, AI))
+            {
+                it = Allocas_Promoted.erase(it);
+                continue;
+            }
+        }
+        it++;
+    }
+    // Place_phi_fu(bg,&F);
+    insertPhi(bg, &F);
+    // combine_addr(&F);
+    Rename_alloca(bg, F);
+    // combine_addr(&F);
+    // del_undef_phi(F);
+}
+
+bool runOnFunction(L_func &F)
+{
+    Allocas_Promoted.clear();
+    DefsBlock.clear();
+    UsesBlock.clear();
+    PhiMap.clear();
+    DomFsBlock.clear();
+    allocUses.clear();
+    allocDefs.clear();
+
+    developFuncEntryBlock(F);
+    set_stm_block(&F);
+    collectPromotedAllocas(F);
+
+    if (Allocas_Promoted.empty())
+        return true;
+
+    // /// 计算支配树
+    auto RA_bg = Create_bg(F.blocks);
+    SingleSourceGraph(RA_bg.mynodes[0], RA_bg, &F);
+    Liveness(RA_bg.mynodes[0], RA_bg, F.args);
+    Dominators(RA_bg);
+    tree_Dominators(RA_bg);
+    computeDF(RA_bg, RA_bg.mynodes[0]);
+    printf_DF();
+    printf_D_tree();
+    executeMem2Reg(F, RA_bg);
+    return true;
+}
+
+bool is_dominate(DominatorTree tree, L_block *b1, L_block *b2)
+{
+    if (b1 == b2)
+    {
+        return true;
+    }
+
+    L_block *pred = tree[b2].pred;
+    while (pred != nullptr)
+    {
+        if (pred == b1)
+        {
+            return true;
+        }
+        pred = tree[pred].pred;
+    }
+    // for (L_block* succ : tree[b2].succs) {
+    //     if (is_dominate(tree, b1, succ)) {
+    //         return true;
+    //     }
+    // }
+    return false;
+}

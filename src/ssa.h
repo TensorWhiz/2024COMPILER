@@ -27,5 +27,15 @@ template <typename T>
 std::unordered_set<T> make_intersection(std::unordered_set<T> &tl1, std::unordered_set<T> &tl2);
 void developFuncEntryBlock(LLVMIR::L_func *fun); 
 
-//typedef unordered_map<LLVMIR::L_block *, imm_Dominator> DominatorTree;
+struct imm_Dominator
+{
+    LLVMIR::L_block *pred;
+    std::unordered_set<LLVMIR::L_block *> succs;
+};
+typedef std::unordered_map<LLVMIR::L_block *, imm_Dominator> DominatorTree;
+bool is_mem_variable(LLVMIR::L_stm *stm);
+
+bool runOnFunction(LLVMIR::L_func &F);
+void developFuncEntryBlock(LLVMIR::L_func &fun);
+bool is_dominate(DominatorTree tree,LLVMIR::L_block* b1,LLVMIR::L_block*b2);
 #endif
