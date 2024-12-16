@@ -38,6 +38,7 @@ AS_func *llvm2asmFunc(L_func &func);
 AS_prog *llvm2asm(L_prog &p);
 
 // Util
+ASM::AS_reg *immReg(int imm, std::list<AS_stm *> &as_list, ASM::AS_type type);
 int getMemLength(TempDef &members); // 获得一个tempdef的大小
 void getCalls(AS_reg *&op_reg, AS_operand *as_operand, list<AS_stm *> &as_list);
 #endif

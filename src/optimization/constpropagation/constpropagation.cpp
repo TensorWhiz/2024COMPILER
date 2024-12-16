@@ -145,7 +145,7 @@ void pc()
         }
     }
     replaceConstant();
-    //rewriteBrPhi();
+    rewriteBrPhi();
 }
 
 void replaceConstant()
@@ -163,7 +163,7 @@ void replaceConstant()
             {
                 auto const_operand = AS_Operand_Const(value_map.get(def).value->u.ICONST);
                 *def = *const_operand;
-                //if (inst->type != L_StmKind::T_CJUMP)
+                if (inst->type != L_StmKind::T_CJUMP)
                     delete_list.push_back(inst);
             }
         }
@@ -193,14 +193,14 @@ void rewriteBrPhi()
 
                 if (const_cond->u.ICONST != 0)
                 {
-                    //condBrToJmp(branch_inst, true_bb, false_bb);
-                    //rewritePhi(branch_inst->bb, false_bb);
+                    condBrToJmp(branch_inst, true_bb, false_bb);
+                    rewritePhi(branch_inst->bb, false_bb);
                 }
 
                 else
                 {
-                    //condBrToJmp(branch_inst, false_bb, true_bb);
-                    //rewritePhi(branch_inst->bb, true_bb);
+                    condBrToJmp(branch_inst, false_bb, true_bb);
+                    rewritePhi(branch_inst->bb, true_bb);
                 }
             }
         }
@@ -209,7 +209,7 @@ void rewriteBrPhi()
 
 void rewritePhi(L_block *bb, L_block *invalid_bb)
 {
-    std::vector<L_stm *> delete_list;
+    //std::vector<L_stm *> delete_list;
     for (auto it = invalid_bb->instrs.begin(); it != invalid_bb->instrs.end();)
     {
         auto phi_inst = *it;
@@ -228,16 +228,15 @@ void rewritePhi(L_block *bb, L_block *invalid_bb)
             assert(phi_inst->u.PHI->phis.size()!=0);
             if (phi_inst->u.PHI->phis.size() == 1)
             {
-                // *phi_inst->u.PHI->dst = *phi_inst->u.PHI->phis[0].first;
-                // delete_list.push_back(phi_inst);
+                *phi_inst=*L_Move(phi_inst->u.PHI->phis[0].first,phi_inst->u.PHI->dst);
             }
         }
         it++;
     }
-    for (auto inst : delete_list)
-    {
-        inst->removeFromBlock();
-    }
+    // for (auto inst : delete_list)
+    // {
+    //     inst->removeFromBlock();
+    // }
 }
 
 void condBrToJmp(L_stm *inst, L_block *jmp_bb,

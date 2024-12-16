@@ -1,7 +1,7 @@
 CXX = clang++
 CXXFLAGS = -std=c++17 -g -O0
 
-TESTCASE_DIR := tests/public
+TESTCASE_DIR := tests/private
 TESTCASES = $(wildcard $(TESTCASE_DIR)/*.tea)
 LLFILES = $(patsubst $(TESTCASE_DIR)/%.tea,$(TESTCASE_DIR)/%.ast,$(TESTCASES))
 
@@ -10,7 +10,7 @@ LLFILES = $(patsubst $(TESTCASE_DIR)/%.tea,$(TESTCASE_DIR)/%.ast,$(TESTCASES))
 run: $(patsubst $(TESTCASE_DIR)/%.tea,$(TESTCASE_DIR)/%.ll,$(TESTCASES))
 
 $(TESTCASE_DIR)/%.ll: $(TESTCASE_DIR)/%.tea build/compiler
-	@./test-functional.sh $* $(TESTCASE_DIR)
+	@./test-functional2.sh $* $(TESTCASE_DIR)
 	@echo
 
 build/compiler: build/y.tab.o build/lex.yy.o build/TeaplAst.o build/TeaplaAst.o build/PrintTeaplaAst.o build/compiler.o build/llvm_ir.o build/ast2llvm.o build/printLLVM.o build/asm_arm.o build/llvm2asm.o build/printASM.o build/temp.o build/allocReg.o build/ssa.o build/bg_llvm.o build/liveness.o build/constpropagation.o

@@ -23,6 +23,8 @@ test_single() {
         failed_tests=$((failed_tests + 1))
         failed_files+=("$test_name")
         return
+    else 
+        echo compiler finish
     fi
 
 	aarch64-linux-gnu-gcc -c src/common/sylib.c -o output/sylib.o
@@ -33,6 +35,8 @@ test_single() {
         failed_tests=$((failed_tests + 1))
         failed_files+=("$test_name")
         return
+    else 
+        echo asm finish
     fi
 
     ARCH=$(uname -m)

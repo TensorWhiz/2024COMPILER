@@ -117,18 +117,7 @@ void structLayoutInit(vector<L_def *> &defs)
  */
 void set_stack(L_func &func)
 {
-    // TODO: 记录局部变量在栈中的位置，设置fpOffset
-    //  Fixme: add here
     stack_frame = 0;
-
-    // 处理函数参数寄存器溢出的情况
-    // for(int i = func.args.size()-1; i>=8; i--){
-    //     stack_frame += INT_LENGTH;
-    //     AS_address *address = new AS_address(new AS_reg(AS_type::Xn, FPR), -stack_frame);
-    //     fpOffset[func.args[i]->num] = address;
-    // }
-
-    // 提前为alloca分配空间
     for (L_block *b : func.blocks)
     {
         for (L_stm *stm : b->instrs)
@@ -790,7 +779,7 @@ void getCalls(AS_reg *&op_reg, AS_operand *as_operand, list<AS_stm *> &as_list)
 
         // store from the const: str #1, ...
         // move the instant into x2: mov x2, #1
-        // AS_reg *src_mov = new AS_reg(AS_type::IMM, as_operand->u.ICONST );
+        // AS_reg *src_mov = new AS_reg(AS_type::IMM, as_operand->u.ICONST);
         AS_reg *dst_mov = new AS_reg(AS_type::Wn, Temp_newtemp_int()->num);
         as_list.push_back(AS_Mov(immReg(as_operand->u.ICONST, as_list, Wn), dst_mov));
         op_reg = dst_mov;
