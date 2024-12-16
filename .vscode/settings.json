@@ -50,6 +50,21 @@
         "list": "cpp",
         "unordered_set": "cpp",
         "map": "cpp",
-        "set": "cpp"
-    }
+        "set": "cpp",
+        "cassert": "cpp",
+        "sstream": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "optional": "cpp",
+        "ratio": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
+    },
+    "debug.allowBreakpointsEverywhere": true
 }

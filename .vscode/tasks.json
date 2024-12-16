@@ -1,10 +1,87 @@
 {
-    "tasks": [
-        {
-            "type": "shell",
-            "label": "make",
-            "command": "make"
-        }
-    ],
-    "version": "2.0.0"
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Compiler",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "compiler"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "detail": "Compiles the compiler binary using the Makefile"
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "command": "make",
+      "args": [
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Cleans all build artifacts."
+    },
+    {
+      "label": "Clean and Build",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build Compiler"
+      ],
+      "detail": "Cleans and builds the project in sequence."
+    },
+    {
+      "label": "Run QEMU",
+      "type": "shell",
+      "command": "qemu-aarch64",
+      "args": [
+        "-g",
+        "1234",
+        "${workspaceFolder}/output/asm/${fileBasenameNoExtension}",
+        "<", "${fileDirname}/${fileBasenameNoExtension}.in",
+        ">", "${workspaceFolder}/output/asm/${fileBasenameNoExtension}.out"
+      ],
+      "problemMatcher": [],
+      "isBackground": true, // 设置为后台运行
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "dependsOn" : ["Build Assembly"]
+    },
+    {
+      "label": "Build Assembly",
+      "type": "shell",
+      "command": "aarch64-linux-gnu-gcc",
+      "args": [
+        "-g",
+        "-o", "${workspaceFolder}/output/asm/${fileBasenameNoExtension}",
+        "${file}",
+        "${workspaceFolder}/output/sylib.o",
+        "--static"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
 }

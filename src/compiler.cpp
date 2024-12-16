@@ -1,21 +1,22 @@
 #include <fstream>
 #include <iostream>
 #include <iostream>
-#include "TeaplAst.h"
-#include "TeaplaAst.h"
-#include "PrintTeaplaAst.h"
+#include "common/TeaplAst.h"
+#include "common/TeaplaAst.h"
+#include "common/PrintTeaplaAst.h"
 // #include "TypeCheck.h"
-#include "y.tab.hpp"
-#include "llvm_ir.h"
-#include "ast2llvm.h"
-#include "printLLVM.h"
-#include "llvm2asm.h"
-#include "printASM.h"
-#include "ssa.h"
-#include "graph.hpp"
-#include "bg_llvm.h"
+#include "../build/y.tab.hpp"
+#include "ir/llvm_ir.h"
+#include "ir/ast2llvm.h"
+#include "ir/printLLVM.h"
+#include "asm/llvm2asm.h"
+#include "asm/printASM.h"
+#include "optimization/mem2reg/ssa.h"
+#include "common/graph.hpp"
+#include "optimization/mem2reg/bg_llvm.h"
+#include "optimization/constpropagation/constpropagation.h"
 #define YACCDEBUG 0
-#define ASMDEBUG 0
+#define ASMDEBUG 1
 using namespace std;
 using namespace LLVMIR;
 
@@ -67,15 +68,17 @@ int main(int argc, char * argv[]) {
     LLVMStream.open(file_name + ".ll");
     auto l_prog = ast2llvm(aroot);
     l_prog=SSA(l_prog);
+    l_prog=PropagateConst(l_prog);
+
     printL_prog(LLVMStream,l_prog);
     LLVMStream.close();
 
-    // ofstream ASMStream;
-    // ASMStream.open(file_name + ".S");
-    // auto as_prog = llvm2asm(*l_prog);
+    ofstream ASMStream;
+    ASMStream.open(file_name + ".S");
+    auto as_prog = llvm2asm(*l_prog);
 
-    // printAS_prog(ASMStream,as_prog);
-    // ASMStream.close();
+    printAS_prog(ASMStream,as_prog);
+    ASMStream.close();
 
     return 0;
 }
