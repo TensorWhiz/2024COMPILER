@@ -96,13 +96,13 @@ void pc()
     cfg_worklist.clear();
     ssa_worklist.clear();
     instruction_visitor = InstructionVisitor();
+    
     cfg_worklist.emplace_back(nullptr, ff->getEntryBlock());
 
     for (auto *bb : ff->blocks)
     {
         for (auto expr : bb->instrs)
         {
-
             auto def = get_stm_def_operand(expr);
             if (def != nullptr)
                 value_map.set(def, {Status::TOP, nullptr});
@@ -113,7 +113,6 @@ void pc()
     auto j = 0;
     while (i < cfg_worklist.size() || j < ssa_worklist.size())
     {
-
         while (i < cfg_worklist.size())
         {
 
@@ -126,6 +125,7 @@ void pc()
             for (auto *inst : bb->instrs)
                 instruction_visitor.visit(inst);
         }
+       
         while (j < ssa_worklist.size())
         {
             auto *inst = ssa_worklist[j++];
@@ -150,7 +150,7 @@ void pc()
 
 void replaceConstant()
 {
-    combine_addr(ff);
+    //combine_addr(ff);
     std::vector<L_stm *> delete_list;
 
     for (auto *bb : ff->blocks)
@@ -159,11 +159,11 @@ void replaceConstant()
         {
             AS_operand *def = get_stm_def_operand(inst);
 
-            if (def != nullptr && value_map.get(def).status == Status::CONST)
+            if (def != nullptr && value_map.get(def).value != nullptr)
             {
                 auto const_operand = AS_Operand_Const(value_map.get(def).value->u.ICONST);
                 *def = *const_operand;
-                if (inst->type != L_StmKind::T_CJUMP)
+                //if (inst->type != L_StmKind::T_CJUMP)
                     delete_list.push_back(inst);
             }
         }
@@ -191,7 +191,7 @@ void rewriteBrPhi()
                 auto true_bb = label2block(branch_inst->u.CJUMP->true_label, ff);
                 auto false_bb = label2block(branch_inst->u.CJUMP->false_label, ff);
 
-                if (const_cond != 0)
+                if (const_cond->u.ICONST != 0)
                 {
                     //condBrToJmp(branch_inst, true_bb, false_bb);
                     //rewritePhi(branch_inst->bb, false_bb);
@@ -304,10 +304,10 @@ void InstructionVisitor::visit(L_stm *instr)
         {
             for (auto it : b->instrs)
             {
-                auto ops = get_use_int_operand(it);
+                auto ops = get_stm_use_operand(it);
                 for (auto op : ops)
                 {
-                    if (*op == def)
+                    if (op == def)
                     {
                         ssa_worklist.push_back(it);
                         break;
