@@ -71,17 +71,11 @@ int getMemLength(TempDef &members)
         return INT_LENGTH;
         break;
     case TempType::STRUCT_PTR:
-        if (structLayout.find(members.structname) == structLayout.end())
-        {
-            Error("结构体先使用后定义");
-        }
+        if (members.len == 0)
+            return structLayout[members.structname]->size;
         return structLayout[members.structname]->size * members.len;
         break;
     case TempType::STRUCT_TEMP:
-        if (structLayout.find(members.structname) == structLayout.end())
-        {
-            Error("结构体先使用后定义");
-        }
         return structLayout[members.structname]->size;
         break;
     default:

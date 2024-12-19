@@ -23,6 +23,14 @@ void getAllRegs(AS_stm *stm, vector<AS_reg *> &defs, vector<AS_reg *> &uses)
         getDefReg(stm->u.MOV->dst, defs);
         getUseReg(stm->u.MOV->src, uses);
         break;
+    case AS_stmkind::MOVZ:
+        getDefReg(stm->u.MOVZ->dst, defs);
+        getUseReg(stm->u.MOVZ->src, uses);
+        break;
+    case AS_stmkind::MOVK:
+        getDefReg(stm->u.MOVK->dst, defs);
+        getUseReg(stm->u.MOVK->src, uses);
+        break;
     case AS_stmkind::LDR:
         getDefReg(stm->u.LDR->dst, defs);
         getUseReg(stm->u.LDR->ptr, uses);
@@ -308,8 +316,8 @@ void init(std::list<InstructionNode *> &nodes, unordered_map<int, Node<RegInfo> 
     }
 }
 
-void livenessAnalysis(std::list<InstructionNode *> &nodes, std::list<ASM::AS_stm *> &as_list)
-{
+//void livenessAnalysis(std::list<InstructionNode *> &nodes, std::list<ASM::AS_stm *> &as_list)
+//{
     // Graph<RegInfo> interferenceGraph;
     // unordered_map<int, Node<RegInfo> *> regNodes; // 虚拟寄存器根据编号到干扰图上的映射
     // init(nodes, regNodes, interferenceGraph, as_list);
@@ -502,7 +510,7 @@ void livenessAnalysis(std::list<InstructionNode *> &nodes, std::list<ASM::AS_stm
     // {
     //     delete nodePair.second;
     // }
-}
+//}
 void livenessAnalysis(std::list<InstructionNode *> &nodes, std::list<ASM::AS_stm *> &as_list)
 {
     Graph<RegInfo> interferenceGraph;
@@ -608,9 +616,13 @@ void livenessAnalysis(std::list<InstructionNode *> &nodes, std::list<ASM::AS_stm
     AS_reg *sp = new AS_reg(AS_type::SP, -1);
     int offset = spill_reg.size() * 8;
     list<AS_stm*>::iterator it = as_list.begin();
-    advance(it, 6);
-    as_list.insert(it, AS_Binop(AS_binopkind::SUB_, sp, new AS_reg(AS_type::IMM, offset), sp));
-
+    advance(it,6);
+    int num1=offset/4095;
+    int num2=offset%4095;
+    for(int i=0;i<num1;i++){
+        as_list.insert(it, AS_Binop(AS_binopkind::SUB_, sp, new AS_reg(AS_type::IMM, 4095), sp));
+    }
+    as_list.insert(it, AS_Binop(AS_binopkind::SUB_, sp, new AS_reg(AS_type::IMM, num2), sp));
     // 保存偏移量
     unordered_map<int, int> offset_map;
     for(int i = 0;i<spill_reg.size();i++){
