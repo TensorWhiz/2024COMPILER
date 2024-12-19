@@ -139,17 +139,11 @@ void set_stack(L_func &func)
                     int size = structLayout[alloca->structname]->size;
                     stack_frame += size;
                 }
-                // 记录寄存器对应的栈帧偏移
                 fpOffset.emplace(alloca->num, new AS_address(new AS_reg(AS_type::Xn, FPR), -stack_frame));
             }
         }
     }
-    // 确保栈帧按照128字节对齐
     stack_frame = ((stack_frame + 15) >> 4) << 4;
-    // for (auto &x : fpOffset)
-    // {
-    //     printf("%r %d %s\n", x.first, printAS_add(x.second).c_str());
-    // }
 }
 
 /**
@@ -465,7 +459,6 @@ void llvm2asmCJmp(list<AS_stm *> &as_list, L_stm *cjmp_stm)
         else
             as_list.push_back(AS_B(new AS_label(cjump->false_label->name)));
         return;
-            
     }
     AS_relopkind kind = condMap[cjump->dst->u.TEMP->num];
 
@@ -921,7 +914,8 @@ void llvm2asmCall(list<AS_stm *> &as_list, L_stm *call)
                 as_list.emplace_back(AS_Str(param, new AS_reg(AS_type::ADR, new AS_address(sp, -sub - param_sub))));
             }
         }
-        as_list.emplace_back(AS_Binop(AS_binopkind::SUB_, sp, new AS_reg(AS_type::IMM, sub + param_sub), sp));
+        //as_list.emplace_back(AS_Binop(AS_binopkind::SUB_, sp, new AS_reg(AS_type::IMM, sub + param_sub), sp));
+        as_list.emplace_back(AS_Binop(AS_binopkind::SUB_, sp, immReg(sub + param_sub,as_list,Xn), sp));
     }
     else
     {

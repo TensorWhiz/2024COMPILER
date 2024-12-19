@@ -85,7 +85,9 @@ LLVMIR::L_prog *PropagateConst(L_prog *prog)
         RA_bg = Create_bg(F->blocks);
         SingleSourceGraph(RA_bg.mynodes[0], RA_bg, F);
         pc();
+        combine_addr(F);
     }
+   
     return prog;
 }
 

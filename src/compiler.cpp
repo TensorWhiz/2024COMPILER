@@ -15,6 +15,7 @@
 #include "common/graph.hpp"
 #include "optimization/mem2reg/bg_llvm.h"
 #include "optimization/constpropagation/constpropagation.h"
+#include "optimization/cse/easy.h"
 #define YACCDEBUG 0
 #define ASMDEBUG 1
 using namespace std;
@@ -69,6 +70,7 @@ int main(int argc, char * argv[]) {
     auto l_prog = ast2llvm(aroot);
     l_prog=SSA(l_prog);
     l_prog=PropagateConst(l_prog);
+    l_prog=CSE_EASY(l_prog);
 
     printL_prog(LLVMStream,l_prog);
     LLVMStream.close();

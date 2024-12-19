@@ -858,13 +858,11 @@ void Rename_temp_alloca(GRAPH::Graph<LLVMIR::L_block *> &bg, GRAPH::Node<LLVMIR:
             bool del = true;
             if (stm->u.LOAD->ptr->kind == OperandKind::TEMP && stm->u.LOAD->dst->kind == OperandKind::TEMP)
             {
-                 if (GepPtrList.find(stm->u.LOAD->ptr) != GepPtrList.end())
-                continue;
-               *(stm->u.LOAD->dst)=*Stack[stm->u.LOAD->ptr->u.TEMP].top();
+                if (GepPtrList.find(stm->u.LOAD->ptr) != GepPtrList.end())
+                    continue;
+                *(stm->u.LOAD->dst) = *Stack[stm->u.LOAD->ptr->u.TEMP].top();
                 InstCanBeRemoveList.push_back(stm);
-                
-                }
-
+            }
         }
         else if (stm->type == L_StmKind::T_PHI)
 
